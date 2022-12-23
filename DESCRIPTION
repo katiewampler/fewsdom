@@ -1,0 +1,11 @@
+Package: FEWSAqualog
+Type: Package
+Title: Tools to Process Data from Horiba Aqualog
+Version: 0.1.0
+Authors@R: person("Katie A.", "Wampler", email = "katie.wampler@oregonstate.edu",
+  role = c("aut", "cre"))
+Description: Collection of functions used to process raw data collected 
+    from a Horiba Aqualog, output cleaned data, indicies, and plots.
+License: 
+Encoding: UTF-8
+LazyData: true
