@@ -10,13 +10,14 @@
 #' @importFrom stringr str_detect str_split
 #' @importFrom readxl read_xlsx
 #' @importFrom openxlsx write.xlsx
+#' @importFrom utils write.csv
 #'
 #' @param doc_file a string of the file path of the doc file, can be .xlsx or .csv
 #' @param doc_sheet a string of the sheet name of the doc results, only required if the doc file is an .xlsx file
 #' @param doc_column a numeric indicating which column the doc results are stored in in the doc file
 #' @param name_column a numeric indicating which column the sample/site names are stored in the doc file
 #' @param nskip a numeric indicating a number of lines to skip when reading in the doc file, optional
-#' @param site_delim a string indicating the separation between site name and other identifiers in the doc data, it will only keep the first piece
+#' @param doc_delim a string indicating the separation between site name and other identifiers in the doc data, it will only keep the first piece
 #'
 #' @param meta_file a string indicating the file path of the metadata, can be .xlsx or .csv
 #' @param meta_sheet a string of the metadata sheet name, only required if the metadata file is an .xlsx file
@@ -24,7 +25,7 @@
 #' @param rewrite A logical, if TRUE original metadata will be saved over with metadata with DOC results, if FALSE it will add "_doc_added" to the end of the table
 #' @export
 
-get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, site_delim="-",
+get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, doc_delim="-",
                     meta_file, meta_sheet, meta_delim, rewrite=T){
   #read in doc data
     if(stringr::str_detect(doc_file, ".xlsx")){
@@ -38,10 +39,9 @@ get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, site_
     colnames(doc_result) <- c("Site", "DOC")
 
   #clean site names, we submit samples to the lab with date and time stamps, but we match just site name (for now)
-    doc_result$Site <- sapply(stringr::str_split(doc_result$Site, site_delim),"[[",1)
+    doc_result$Site <- sapply(stringr::str_split(doc_result$Site, doc_delim),"[[",1)
 
   #load metadata
-    meta_file <- paste(prjpath,"/metatable_manual_", datepath, ".xlsx", sep="")
     if(stringr::str_detect(meta_file, ".xlsx")){
       meta <- readxl::read_xlsx(meta_file, sheet = meta_sheet)
     } else{
@@ -54,13 +54,16 @@ get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, site_
   #Put DOC in metadata
     meta$DOC_mg_L <- doc_result$DOC[match(meta$Site, doc_result$Site)]
 
+  #remove site column
+    meta <- meta[,-which(colnames(meta) == "Site")]
+
     #check it "worked"
-    if(sum(is.na(meta$DOC_mg_L)) == rnow(meta)){
+    if(sum(is.na(meta$DOC_mg_L)) == nrow(meta)){
       warning("No matching DOC results were found, please check your file names and delimeters")
     }
 
   #write metafile
-    if(overwrite==T){
+    if(rewrite==T){
       if(stringr::str_detect(meta_file, ".xlsx")){
         openxlsx::write.xlsx(meta, meta_file, sheetName = meta_sheet,
                    colNames = TRUE, rowNames = F, append = F)} else{
@@ -73,4 +76,7 @@ get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, site_
       new_meta_file <- paste(unlist(str_split(meta_file, ".csv"))[1], "_doc_added.csv", sep="")
        write.csv(meta, new_meta_file, col.names = T, row.names = F, quote=F)}
     }
+
+
+    message(paste("Linked ", sum(!is.na(meta$DOC_mg_L)), "/", nrow(meta), " samples with DOC data", sep=""))
 }
