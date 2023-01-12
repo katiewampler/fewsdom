@@ -1,28 +1,28 @@
-#' Process EEM's samples
+#' Process EEMs samples
 #'
 #' Takes EEMs data with blanks and absorbance data and will perform processing
 #' steps including blank subtraction, removing raman and rayleigh scattering,
-#' dilution correction, removing inner filtering effects, raman normalization
+#' dilution correction, removing inner filtering effects, raman normalization.
 #'
 #' @importFrom eemR eem_names
 #'
-#' @param prjpath The file path of the main file directory where data is located
-#' @param eemlist object of class eem or eemlist containing eem's samples
+#' @param prjpath the file path of the main file directory where data is located
+#' @param eemlist object of class eem or eemlist containing EEMs samples
 #' @param blanklist object of class eem or eemlist containing the blanks for the eem's samples should be the same length as eem
-#' @param abs dataframe containing absorbance data corresponding to the eem's samples
-#' @param process_file logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'
+#' @param abs dataframe containing absorbance data corresponding to the EEMs samples
 #' @param meta dataframe of metadata containing unique ID's, integration time, dilutions, and raman area for each sample, see example metadata for format
+#' @param process_file logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'
 #' @param replace_blank logical, if TRUE it will find the first sample labeled "blank" or "blk" and use that for blank subtraction, use when instrument blank has errors
 #' @param raman logical, if TRUE will use 'raman' function to remove raman scattering
 #' @param rayleigh logical, if TRUE will use 'rayleigh' function to remove rayleigh scattering
 #' @param IFE logical, if TRUE will use absorbance data to remove inner filter effects
-#' @param raman_norm logical, if TRUE will normalize EEM's to raman unit area
+#' @param raman_norm logical, if TRUE will normalize EEMs to raman unit area
 #' @param dilute logical, if TRUE will correct for dilution factors given in metadata table
-#' @param ex_clip vector of length two with the excitation wavelengths to clip the EEM's to
-#' @param em_clip vector of length two with the emission wavelengths to clip the EEM's to
-#' @param doc_norm logical, if TRUE will normalize EEM's to 1 mg/L carbon, will remove any samples without DOC concentrations in the metadata
+#' @param ex_clip vector of length two with the excitation wavelengths to clip the EEMs to
+#' @param em_clip vector of length two with the emission wavelengths to clip the EEMs to
+#' @param doc_norm logical, if TRUE will normalize EEMs to 1 mg/L carbon, will remove any samples without DOC concentrations in the metadata
 #' @param ... arguments passed on to scattering functions 'raman' and 'rayleigh'
-#' @return an list where the first object is of class eemlist with processed EEM's samples. The
+#' @return an list where the first object is of class eemlist with processed EEMs samples. The
 #' second object is a dataframe with the processes absorbance data.
 #' If a process file is given, a file will be created in the processes folder of the file directory
 #' @export
@@ -30,21 +30,42 @@
 eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          meta, process_file=T, replace_blank=F,
                          raman=T, rayleigh=T, IFE=T, raman_norm=T,
-                         dilute = T, em_clip = c(247,550),
-                         ex_clip = c(247,450), doc_norm=T, ...){
-  #create text file to track processing changes
-  #create folders for finished data
-  dir.create(paste(prjpath, "/5_Processed", sep=""), showWarnings = F)
+                         dilute = T, ex_clip = c(247,450),
+                         em_clip = c(247,550), doc_norm=T, ...){
 
+  stopifnot(is.character(prjpath) | .is_eemlist(eemlist) | .is_eem(eemlist) |
+              .is_eemlist(blanklist) | .is_eem(blanklist)| is.data.frame(abs)|
+              is.logical(process_file)| is.logical(replace_blank)|is.logical(raman)|
+              is.logical(rayleigh)|is.logical(IFE)|is.logical(raman_norm)|
+              is.logical(dilute)|is.numeric(em_clip)|is.numeric(ex_clip)|
+              is.logical(doc_norm)|file.exists(prjpath))
+
+  #make sure file directory is good
+  if(file.exists(paste(prjpath,  "/5_Processed", sep=""))==F){
+    stop("Invalid file structure, please use 'create_files' function to create file for plots within file directory")
+  }
+
+  #create text file to track processing changes
   if(process_file==T){
     process_file_name <- paste(prjpath, "/5_Processed/processing_tracking.txt", sep="")
     file.create(process_file_name)
     write.table(paste("PROCESSING STEPS ON ", Sys.Date(), sep=""), process_file_name, append=F, quote=F, row.names = F, col.names = F)
   }
 
+  #create attributes to track processing
+  eemlist <- lapply(1:length(eemlist), function(i) {
+    attr(eemlist[[i]], "is_doc_normalized") <- FALSE
+    return(eemlist[[i]])})
+  eemlist <- lapply(1:length(eemlist), function(i) {
+    attr(eemlist[[i]], "is_dil_corrected") <- FALSE
+    return(eemlist[[i]])})
+  class(eemlist) <- class(blanklist)
+  attr(abs, "is_doc_normalized") <- FALSE
+  attr(abs, "is_dil_corrected") <- FALSE
+
   #subtract blank
   X_sub <- eemlist
-  for(n in 1:length(eemlist)){
+  X_sub <- lapply(1:length(X_sub), function(n, replace_blank){
     eem <- eemlist[[n]]
     if(replace_blank == T){
       blank <- eemlist[[which(stringr::str_detect(meta$unique_ID, "BLK|blk|blank|blank|BLANK") == T)[1]]]
@@ -52,9 +73,11 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     } else{
       blank <- blanklist[[n]]
     }
-    eem_blank <- eem$x - blank$x
-    X_sub[[n]]$x <- eem_blank
-  }
+    X_sub[[n]]$x <- eem$x - blank$x
+    attr(X_sub[[n]], "is_blank_corrected") <- TRUE
+    return(X_sub[[n]])
+  }, replace_blank=replace_blank)
+  class(X_sub) <- "eemlist"
   write.table(paste(Sys.time(), "- blanks were subtracted from samples", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
 
   #remove raman scattering
@@ -83,26 +106,38 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
   X_norm <- X_ife
   if(raman_norm == T){
     meta$raman_norm <- meta$integration_time_s * meta$RSU_area_1s
-
-    for(f in 1:length(X_norm)){
+    X_norm <- lapply(1:length(X_norm), function(f){
       eem_name <- X_norm[[f]]$sample
       eem_index <- which(eem_name == meta$unique_ID)
-      X_norm[[f]]$x <- X_ife[[f]]$x / meta$raman_norm[eem_index]}
+      X_norm[[f]]$x <- X_ife[[f]]$x / meta$raman_norm[eem_index]
+      attr(X_norm[[f]], "is_raman_normalized") <- TRUE
+      return(X_norm[[f]])
+    })
+    class(X_norm) <- "eemlist"
     write.table(paste(Sys.time(), "- EEM's were normalized by raman area", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)}
 
   #account for dilutions
   X_dil_cor <- X_norm
   Sabs_dil_cor <- abs
-  if(dilute==T & sum(meta$dilution != 1) > 0){
-    dil_data <- 1/meta["dilution"] #invert to match function
-    X_dil_cor <- X_dil_cor %>% eem_dilution(dil_data)
+  if(dilute == T){
+    X_dil_cor <- lapply(1:length(X_dil_cor), function(x){
+      attr(X_dil_cor[[x]], "is_dil_corrected") <- TRUE
+      return(X_dil_cor[[x]])
+    })
+    class(X_dil_cor) <- "eemlist"
+    attr(abs, "is_dil_corrected") <- TRUE
     write.table(paste(Sys.time(), "- EEM's were corrected for dilutions", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
-
-    #correct absorbance for dilution
-    for(x in 1:nrow(meta)){
-      dil_fact <- meta$dilution[x]
-      Sabs_dil_cor[,meta$abs_col[x]] <- abs[,meta$abs_col[x]] / dil_fact}
     write.table(paste(Sys.time(), "- Absorbance was corrected for dilutions", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
+
+    if(sum(meta$dilution != 1) > 0){
+      dil_data <- 1/meta["dilution"] #invert to match function
+      X_dil_cor <- X_dil_cor %>% eem_dilution(dil_data)
+
+      #correct absorbance for dilution
+      for(x in 1:nrow(meta)){
+        dil_fact <- meta$dilution[x]
+        Sabs_dil_cor[,meta$abs_col[x]] <- abs[,meta$abs_col[x]] / dil_fact}
+    }
   }
 
   #normalize for DOC
@@ -121,11 +156,14 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     }
 
     #EEMs
-    for (x in 1:length(X_DOC)){
+    X_DOC <- lapply(1:length(X_DOC), function(x){
       eem_name <- X_DOC[[x]]$sample
       eem_index <- which(eem_name == meta$unique_ID)
       X_DOC[[x]]$x <- X_DOC[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
-    }
+      attr(X_DOC[[x]], "is_doc_normalized") <- TRUE
+      return(X_DOC[[x]])
+    })
+    class(X_DOC) <- "eemlist"
 
     #Absorbance
     for(x in colnames(Sabs_DOC)[2:ncol(Sabs_DOC)]){
@@ -133,6 +171,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
       abs_index <- which(x == meta$unique_ID)
       doc <- as.numeric(meta$DOC_mg_L[abs_index])
       Sabs_DOC[,col_num] <- Sabs_DOC[,col_num] / doc}
+    attr(Sabs_DOC, "is_doc_normalized") <- TRUE
     write.table(paste(Sys.time(), "- Absorbance and EEM's were normalized by DOC concentration", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
 
   }
@@ -196,12 +235,6 @@ eem_dilution <- function (data, dilution = 1)
 #' @noRd
 eem_inner_filter_effect <- function (eem, absorbance, pathlength = 1, verbose=F)
 {
-  .is_eemlist <- function(eem) {
-    ifelse(class(eem) == "eemlist", TRUE, FALSE)
-  }
-  .is_eem <- function(eem) {
-    ifelse(class(eem) == "eem", TRUE, FALSE)
-  }
   stopifnot(.is_eemlist(eem) | .is_eem(eem), is.data.frame(absorbance),
             is.numeric(pathlength))
   if (.is_eemlist(eem)) {

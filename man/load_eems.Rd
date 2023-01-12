@@ -12,5 +12,5 @@ load_eems(prjpath)
 \description{
 Takes the Aqualog files that have been renamed and put in separate folders within
 the main directory via the 'clean_files' function and loads them into R as
-eem lists. It will check to see if maximum absorbance is below 0.3
+eemlists. It will also check to see if maximum absorbance is below 0.3.
 }

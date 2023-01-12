@@ -1,20 +1,21 @@
-#' Convert Absorbance Data from a .dat file to .csv file
+#' Convert absorbance data from a .dat file to .csv file
 #'
-#' Existing functions to read absorbance data read data in as .csv files, but the
-#' default from the Aqualog is a .dat file. This function takes a folder of
-#' .dat files and converts them to .csv in the correct format for reading in
-#' using the the 'absorbance_read' function from the staRdom package
+#' Takes a folder of .dat absorbance files and converts them to .csv in the
+#' correct format for reading in using the the 'absorbance_read' function from
+#' the staRdom package.
 #'
-#' Use 'file_data' function before running this function to ensure file structure is correct for preprocessing
+#' Use 'clean_files' function before running this function to ensure file structure is correct for pre-processing.
 #'
 #' @importFrom stringr str_split
 #'
 #' @param prjpath a string indicating the project file containing the absorbance data to process
-#' @param runtype indicates how data was run on the Aqualog, either "manual", "sampleQ", or "mixed". If "mixed" it will get run type from the metadata table
+#' @param runtype indicates how data was run on the Aqualog, either "manual", "sampleQ", or "mixed". If "mixed" it will get run type from the metadata
 #' @param meta the metadata table for the sample run, only required if runtype is "mixed"
 #' @export
 
-abs_preprocess <- function(prjpath, runtype="SampleQ", meta){
+abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
+  stopifnot(is.character(prjpath)|runtype %in% c("manual","sampleQ", "mixed")|
+              file.exists(prjpath))
   abs_files <- list.files(paste(prjpath, "/1_Absorbance", sep="")) #get files to process
   abs_files_done <- list.files(paste(prjpath, "/4_Clean_Absorbance", sep="")) #get names of finished files
 
@@ -25,8 +26,9 @@ abs_preprocess <- function(prjpath, runtype="SampleQ", meta){
   #checks to see if all there's files that haven't been processed yet
   if(length(abs_files) > length(abs_files_done)){
     names <- sapply(stringr::str_split(abs_files, "_Abs.dat"),"[[",1) #get file names only
-    dir.create(paste(prjpath, "/4_Clean_Absorbance", sep=""), showWarnings = F) #create file for clean files if it doesn't exist yet
-
+    if(file.exists(paste(prjpath,  "/4_Clean_Absorbance", sep=""))==F){
+      stop("Invalid file structure, please use 'create_files' function to create file for plots within file directory")
+    }
     #go through each sample. check, clean, and save
     for(x in names){
       #load data

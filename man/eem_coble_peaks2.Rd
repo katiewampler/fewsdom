@@ -2,21 +2,21 @@
 % Please edit documentation in R/indices.R
 \name{eem_coble_peaks2}
 \alias{eem_coble_peaks2}
-\title{Get Coble Peaks and Other Fluorescence Indicies}
+\title{Get Coble Peaks and other fluorescence indicies}
 \usage{
-eem_coble_peaks2(eem, absorbance, noise_ratio = 5, verbose = FALSE)
+eem_coble_peaks2(eem, abs_data, noise_ratio = 5, verbose = FALSE)
 }
 \arguments{
-\item{eem}{An object of class eem or eemlist.}
+\item{eem}{an object of class eem or eemlist}
 
-\item{absorbance}{A dataframe of absorbance data matching the samples, used to calculate relative fluorescence efficiency}
+\item{abs_data}{dataframe of absorbance data matching the samples, used to calculate relative fluorescence efficiency}
 
-\item{noise_ratio}{Numeric indicating the noise threshold for ratio calculations.}
+\item{noise_ratio}{numeric indicating the noise threshold for ratio calculations}
 
-\item{verbose}{Logical determining if additional messages should be printed.}
+\item{verbose}{logical determining if additional messages should be printed}
 }
 \value{
-Returns a data frame containing fluorescence peaks and indices for each sample.
+Returns a data frame containing fluorescence peaks and indices for each sample
 }
 \description{
 Modified from 'eem_coble_peaks' from eemR package to include some additional indices and

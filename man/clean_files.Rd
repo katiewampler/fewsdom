@@ -7,13 +7,16 @@
 clean_files(prjpath, meta_file, meta_sheet, zip_files = T)
 }
 \arguments{
-\item{prjpath}{The file path of the file where data is located}
+\item{prjpath}{the file path of the main file directory where data is located}
 
 \item{meta_file}{file location of metadata table, used to determine how samples were run}
 
 \item{meta_sheet}{optional, sheet name of the metadata only required if metadata is an .xlsx file}
 
-\item{zip_files}{Will create a zip file in the file directory of all the raw, nonrenamed files from the Aqualog as a backup}
+\item{zip_files}{will create a zip file in the file directory of all the raw, non-renamed files from the Aqualog as a backup}
+}
+\value{
+metadata table with an added column for the unique ID
 }
 \description{
 Takes the default files from the Aqualog (absorbance, blank, and sample)

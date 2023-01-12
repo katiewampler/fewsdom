@@ -2,7 +2,7 @@
 % Please edit documentation in R/eem_process.R
 \name{eem_proccess}
 \alias{eem_proccess}
-\title{Process EEM's samples}
+\title{Process EEMs samples}
 \usage{
 eem_proccess(
   prjpath,
@@ -17,20 +17,20 @@ eem_proccess(
   IFE = T,
   raman_norm = T,
   dilute = T,
-  em_clip = c(247, 550),
   ex_clip = c(247, 450),
+  em_clip = c(247, 550),
   doc_norm = T,
   ...
 )
 }
 \arguments{
-\item{prjpath}{The file path of the main file directory where data is located}
+\item{prjpath}{the file path of the main file directory where data is located}
 
-\item{eemlist}{object of class eem or eemlist containing eem's samples}
+\item{eemlist}{object of class eem or eemlist containing EEMs samples}
 
 \item{blanklist}{object of class eem or eemlist containing the blanks for the eem's samples should be the same length as eem}
 
-\item{abs}{dataframe containing absorbance data corresponding to the eem's samples}
+\item{abs}{dataframe containing absorbance data corresponding to the EEMs samples}
 
 \item{meta}{dataframe of metadata containing unique ID's, integration time, dilutions, and raman area for each sample, see example metadata for format}
 
@@ -44,25 +44,25 @@ eem_proccess(
 
 \item{IFE}{logical, if TRUE will use absorbance data to remove inner filter effects}
 
-\item{raman_norm}{logical, if TRUE will normalize EEM's to raman unit area}
+\item{raman_norm}{logical, if TRUE will normalize EEMs to raman unit area}
 
 \item{dilute}{logical, if TRUE will correct for dilution factors given in metadata table}
 
-\item{em_clip}{vector of length two with the emission wavelengths to clip the EEM's to}
+\item{ex_clip}{vector of length two with the excitation wavelengths to clip the EEMs to}
 
-\item{ex_clip}{vector of length two with the excitation wavelengths to clip the EEM's to}
+\item{em_clip}{vector of length two with the emission wavelengths to clip the EEMs to}
 
-\item{doc_norm}{logical, if TRUE will normalize EEM's to 1 mg/L carbon, will remove any samples without DOC concentrations in the metadata}
+\item{doc_norm}{logical, if TRUE will normalize EEMs to 1 mg/L carbon, will remove any samples without DOC concentrations in the metadata}
 
 \item{...}{arguments passed on to scattering functions 'raman' and 'rayleigh'}
 }
 \value{
-an list where the first object is of class eemlist with processed EEM's samples. The
+an list where the first object is of class eemlist with processed EEMs samples. The
 second object is a dataframe with the processes absorbance data.
 If a process file is given, a file will be created in the processes folder of the file directory
 }
 \description{
 Takes EEMs data with blanks and absorbance data and will perform processing
 steps including blank subtraction, removing raman and rayleigh scattering,
-dilution correction, removing inner filtering effects, raman normalization
+dilution correction, removing inner filtering effects, raman normalization.
 }

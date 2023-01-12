@@ -1,4 +1,4 @@
-#' Input DOC data into Metadata Table
+#' Input DOC data into metadata
 #'
 #' Takes data from a separate table of DOC results and puts
 #' it in the metadata table under the correct sample. The code assumes
@@ -12,12 +12,12 @@
 #' @importFrom openxlsx write.xlsx
 #' @importFrom utils write.csv
 #'
-#' @param doc_file a string of the file path of the doc file, can be .xlsx or .csv
-#' @param doc_sheet a string of the sheet name of the doc results, only required if the doc file is an .xlsx file
-#' @param doc_column a numeric indicating which column the doc results are stored in in the doc file
-#' @param name_column a numeric indicating which column the sample/site names are stored in the doc file
-#' @param nskip a numeric indicating a number of lines to skip when reading in the doc file, optional
-#' @param doc_delim a string indicating the separation between site name and other identifiers in the doc data, it will only keep the first piece
+#' @param doc_file a string of the file path of the DOC file, can be .xlsx or .csv
+#' @param doc_sheet a string of the sheet name of the DOC results, only required if the DOC file is an .xlsx file
+#' @param doc_column a numeric indicating which column the DOC results are stored in in the DOC file
+#' @param name_column a numeric indicating which column the sample/site names are stored in the DOC file
+#' @param nskip a numeric indicating a number of lines to skip when reading in the DOC file, optional
+#' @param doc_delim a string indicating the separation between site name and other identifiers in the DOC data, it will only keep the first piece
 #'
 #' @param meta_file a string indicating the file path of the metadata, can be .xlsx or .csv
 #' @param meta_sheet a string of the metadata sheet name, only required if the metadata file is an .xlsx file
@@ -25,8 +25,12 @@
 #' @param rewrite A logical, if TRUE original metadata will be saved over with metadata with DOC results, if FALSE it will add "_doc_added" to the end of the table
 #' @export
 
-get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, doc_delim="-",
-                    meta_file, meta_sheet, meta_delim, rewrite=T){
+get_doc <- function(doc_file, doc_sheet=NULL, doc_column, name_column, nskip=0, doc_delim="-",
+                    meta_file, meta_sheet=NULL, meta_delim, rewrite=T){
+  stopifnot(is.character(c(doc_file, doc_delim, meta_file,meta_delim)) |
+              is.numeric(c(doc_column, name_column, nskip))| file.exists(doc_file)|
+              file.exists(meta_file))
+
   #read in doc data
     if(stringr::str_detect(doc_file, ".xlsx")){
       doc_result <- readxl::read_xlsx(doc_file, sheet = doc_sheet, skip=nskip )
@@ -53,6 +57,7 @@ get_doc <- function(doc_file, doc_sheet, doc_column, name_column, nskip=0, doc_d
 
   #Put DOC in metadata
     meta$DOC_mg_L <- doc_result$DOC[match(meta$Site, doc_result$Site)]
+    meta$DOC_mg_L <- as.numeric(meta$DOC_mg_L) #ensure it's a numeric not character
 
   #remove site column
     meta <- meta[,-which(colnames(meta) == "Site")]

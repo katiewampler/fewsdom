@@ -1,4 +1,4 @@
-#' Removes Rayleigh and Raman Scattering
+#' Removes rayleigh and raman scattering
 #'
 #' Based on 'eem_remove_scattering' function from eemR package, added functionality
 #' to cut different amounts from above and below the emission line. This function will only remove
@@ -12,14 +12,14 @@
 #' @importFrom utils read.csv read.table write.table
 #' @import dplyr
 #'
-#' @param eem An object of class eemlist or eem.
-#' @param type A string, either "raman" or "rayleigh".
-#' @param order An integer number, either 1 (first order) or 2 (second order).
-#' @param up_width An integer number specifying the width in nm for the cut above the emission line.
-#' @param down_width An integer number specifying the width in nm for the cut below the emission line.
+#' @param eem an object of class eemlist or eem
+#' @param type a string, either "raman" or "rayleigh"
+#' @param order an integer number, either 1 (first order) or 2 (second order)
+#' @param up_width an integer number specifying the width in nm for the cut above the emission line
+#' @param down_width an integer number specifying the width in nm for the cut below the emission line
 #' @export
 
-eem_remove_scattering2 <- function(eem,up_width=10, down_width=10, type="raman", order=1){
+eem_remove_scattering2 <- function(eem,type="raman", order=1, up_width=10, down_width=10){
 
   #functions to run code
   .find_raman_peaks <- function(ex) {
@@ -42,17 +42,12 @@ eem_remove_scattering2 <- function(eem,up_width=10, down_width=10, type="raman",
 
     return(raman_peaks)
   }
-  .is_eemlist <- function(eem) {
-    ifelse(class(eem) == "eemlist", TRUE, FALSE)
-  }
-  .is_eem <- function(eem) {
-    ifelse(class(eem) == "eem", TRUE, FALSE)
-  }
 
   #function checks
   stopifnot(.is_eemlist(eem) | .is_eem(eem), all(type %in%
                                                    c("raman", "rayleigh")), is.numeric(order),length(order) == 1, length(type) == 1,
-            usefun::is_between(order, 1, 2, include.high.value = T))
+            usefun::is_between(order, 1, 2, include.high.value = T) |
+              is.numeric(c(up_width, down_width)))
 
   #if its an eemlist
   if (.is_eemlist(eem)) {
@@ -87,30 +82,28 @@ eem_remove_scattering2 <- function(eem,up_width=10, down_width=10, type="raman",
 }
 
 
-#' Finds Optimal Scattering Cut Widths Based on EEM set
+#' Finds optimal scattering cut widths based on EEM set
 #'
-#' Takes a group of eems and uses peak picking to determine how wide the cut should be
-#' for each scattering line (does not work for 2nd order raman). Uses the exciatation at 280nm
+#' Takes a group of EEMs and uses peak picking to determine how wide the cut should be
+#' for each scattering line (does not work for 2nd order raman). Uses the excitation at 280nm
 #' and finds the start and end of the peak. If the function can't find one, it will default to NA
 #' for that sample. Median of the peak widths is reported for use in the 'remove_scattering' function.
 #' Should be performed on data that is untransformed besides a blank subtraction.
 #'
 #
-#' @param eem An object of class eemlist.
-#' @param type A string, either "raman" or "rayleigh".
-#' @param order An integer number, either 1 (first order) or 2 (second order).
+#' @param eem an object of class eemlist
+#' @param type a string, either "raman" or "rayleigh"
+#' @param order an integer number, either 1 (first order) or 2 (second order)
 #' @export
 
 find_cut_width <- function(eem, type="rayleigh", order=1){
-  .is_eemlist <- function(eem) {
-    ifelse(class(eem) == "eemlist", TRUE, FALSE)
-  }
   .percent_dif <- function(start, end){
     result <- (end - start) / start * 100
     result
   }
 
-  stopifnot(.is_eemlist(eem))
+  stopifnot(.is_eemlist(eem) | type %in% c("raman", "rayleigh") | order %in% c(1,2))
+
   if(type == "raman" & order == 2){
     warning("Cannot use the auto cutting method for second order raman line, providing estimate.")
 
@@ -145,7 +138,6 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
     peaks <- as.data.frame(pracma::findpeaks(df$int, sortstr=T, minpeakheight = 100))
     peaks <- peaks[peaks$V2 > row_start & peaks$V2 < row_end,]
 
-
     if(nrow(peaks) == 0){
       up_width <- NA
       down_width <- NA
@@ -169,10 +161,14 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
 
       #identify start and end where range changes more than 20%/5 and is less than 90% of the peak
       pos_start <- clip[clip$change > thresh & clip$int < 0.9*peak$int,]
-      pos_start <- pos_start[as.numeric(row.names(pos_start))< xp,]
+      pos_rowname <- row.names(pos_start)
+      pos_rowname <- pos_rowname[!(str_detect(pos_rowname, "NA"))]
+      pos_start <- pos_start[as.numeric(pos_rowname)< xp,]
 
       pos_end <- clip[clip$change > -thresh & clip$int < 0.9*peak$int,]
-      pos_end <- pos_end[as.numeric(row.names(pos_end))> xp,]
+      pos_rowname <- row.names(pos_end)
+      pos_rowname <- pos_rowname[!(str_detect(pos_rowname, "NA"))]
+      pos_end <- pos_end[as.numeric(pos_rowname)> xp,]
 
       #find end points
       if((nrow(pos_end) == 0 & nrow(pos_start) == 0)){
@@ -213,35 +209,37 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
   widths
 }
 
-#' Removes Rayleigh Scattering with Optional Interpolation
+#' Removes rayleigh scattering with optional interpolation
 #'
 #' Will remove both first and second order rayleigh scattering with the option to interpolate
-#' the removed area. Also makes note that the correction was made in an optional textfile.
+#' the removed area. Also makes note that the correction was made in an optional text file.
 #'
 #
-#' @param eem An object of class eemlist.
-#' @param rayleigh_mask Optional if auto width method is used, A vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line.
-#' @param width_method Either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function.
-#' @param rayleigh_interp A vector of length two, either T or F, specifying whether the first and second order lines should be interpolated. The first position refers to the first order line. The way the code is written you cannot interpolate the first order line and not the second.
-#' @param process_file A file path to a .txt file, used to track processing changes to EEMs.
+#' @param eem an object of class eemlist
+#' @param rayleigh_mask optional if auto width method is used, a vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line
+#' @param width_method either "auto" or "manual", if auto is chosen cutting widths will be found using the 'find_cut_width' function
+#' @param rayleigh_interp a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second
+#' @param process_file a file path to a .txt file, used to track processing changes to EEMs
+#' @param verbose a logical, if TRUE will print out widths used to mask via the auto width method
 #' @export
 
-rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), width_method="auto", rayleigh_interp=c(F,F), process_file=NULL){
-  .is_eemlist <- function(eem) {
-    ifelse(class(eem) == "eemlist", TRUE, FALSE)
-  }
+rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), width_method="auto", rayleigh_interp=c(F,F), process_file=NULL, verbose=F){
   #function checks
-  stopifnot(.is_eemlist(eem))
+  stopifnot(.is_eemlist(eem) | is.numeric(rayleigh_mask)|length(rayleigh_mask)==4|
+              width_method %in% c("auto", "manual")| length(rayleigh_interp)==2 |
+              is.logical(c(rayleigh_interp, verbose)))
 
   if(width_method == "auto"){
     ray1 <- find_cut_width(eem, type="rayleigh", order=1)
     ray2 <- find_cut_width(eem, type="rayleigh", order=2)
     rayleigh_mask <- c(ray1, ray2)
-    cat(rayleigh_mask)
+    if(verbose==T){
+      cat(rayleigh_mask)
+    }
   }
 
   #second order rayleigh, done first in case there is interpolation
-    suppressWarnings(eem_rm <- eem_remove_scattering2(eem=eem, type="rayleigh", order=2, up_width = rayleigh_mask[3], down_width = rayleigh_mask[4]))
+    eem_rm <- eem_remove_scattering2(eem=eem, type="rayleigh", order=2, up_width = rayleigh_mask[3], down_width = rayleigh_mask[4])
     if(is.character(process_file)){
       write.table(paste(Sys.time(), "- Second order raleigh scattering was removed with a ", rayleigh_mask[3]," nm width above and ",
                         rayleigh_mask[4], " nm width below", sep=""), process_file, append=T, quote=F, row.names = F, col.names = F)}
@@ -251,7 +249,7 @@ rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), width_method="auto", ray
     write.table(paste(Sys.time(), "- Second order raleigh scattering filled via interpolation", sep=""), process_file, append=T, quote=F, row.names = F, col.names = F)}}
 
   #first order rayleigh
-    suppressWarnings(eem_rm <- eem_remove_scattering2(eem=eem_rm, type="rayleigh", order=1, up_width = rayleigh_mask[1], down_width = rayleigh_mask[2]))
+    eem_rm <- eem_remove_scattering2(eem=eem_rm, type="rayleigh", order=1, up_width = rayleigh_mask[1], down_width = rayleigh_mask[2])
     if(is.character(process_file)){
       write.table(paste(Sys.time(), "- First order raleigh scattering was removed with a ", rayleigh_mask[1]," nm width above and ",
                         rayleigh_mask[2], " nm width below", sep=""), process_file, append=T, quote=F, row.names = F, col.names = F)
@@ -262,34 +260,37 @@ rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), width_method="auto", ray
     write.table(paste(Sys.time(), "- First order raleigh scattering filled via interpolation", sep=""), process_file, append=T, quote=F, row.names = F, col.names = F)
   }}
 
-  eem_rm
+  return(eem_rm)
 }
 
 
-#' Removes Raman Scattering with Optional Interpolation
+#' Removes raman scattering with optional interpolation
 #'
 #' Will remove both first and second order raman scattering with the option to interpolate
 #' the removed area. Also makes note that the correct was made.
 #'
 #'
-#' @param eem An object of class eemlist.
-#' @param raman_mask A vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line. Since you cannot use the auto method for second order raman this must be specified.
-#' @param width_method Either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function.
-#' @param raman_interp A vector of length two, either T or F, specifying whether the first and second order lines should be interpolated. The first position refers to the first order line. The way the code is written you cannot interpolate the first order line and not the second.
-#' @param process_file A file path to a .txt file, used to track processing changes to EEMs.
+#' @param eem an object of class eemlist
+#' @param raman_mask a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified
+#' @param width_method either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function
+#' @param raman_interp a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second
+#' @param process_file a file path to a .txt file, used to track processing changes to EEMs
+#' @param verbose a logical, if TRUE will print out widths used to mask via the auto width method
 #' @export
 
-raman <- function(eem, raman_mask=c(10,10,1.5,1.5), width_method="auto", raman_interp=c(T,T), process_file=NULL){
-  .is_eemlist <- function(eem) {
-    ifelse(class(eem) == "eemlist", TRUE, FALSE)
-  }
+raman <- function(eem, raman_mask=c(10,10,1.5,1.5), width_method="auto", raman_interp=c(T,T),
+                  process_file=NULL, verbose=F){
   #function checks
-  stopifnot(.is_eemlist(eem))
+  stopifnot(.is_eemlist(eem) | is.numeric(raman_mask)|length(raman_mask)==4|
+              width_method %in% c("auto", "manual")| length(raman_interp)==2 |
+              is.logical(c(raman_interp, verbose)))
 
   if(width_method == "auto"){
     ram1 <- find_cut_width(eem, type="raman", order=1)
     raman_mask <- c(ram1, raman_mask[3:4])
-    cat(raman_mask)
+    if(verbose ==T){
+      cat(raman_mask)
+    }
   }
   #second order raman, done first for interpolation
   if(sum(raman_mask[3:4]) > 0){
@@ -315,16 +316,17 @@ raman <- function(eem, raman_mask=c(10,10,1.5,1.5), width_method="auto", raman_i
   eem_rm
 }
 
-#' Interpolates Missing Values in EEM Data
+#' Interpolates missing values in EEM data
 #'
-#' 'eem_interp' function in staRdom package
+#' 'eem_interp' function in staRdom package, extracted to prevent orphaned
+#' package errors from staRdom package.
 #'
 #' @importFrom doParallel registerDoParallel
 #' @importFrom zoo na.approx
 #' @importFrom MBA mba.points
 #' @importFrom tidyr gather
+#' @importFrom parallel makeCluster stopCluster
 #' @import foreach
-
 #'
 #' @param data An object of class eemlist.
 #' @param cores	 specify number of cores for parallel computation
@@ -339,7 +341,7 @@ eem_interp <- function (data, cores = parallel::detectCores(logical = FALSE),
                         type = TRUE, verbose = FALSE, nonneg = TRUE, extend = FALSE,
                         ...)
 {
-  cl <- makeCluster(spec = min(cores, length(data)), type = "PSOCK")
+  cl <- parallel::makeCluster(spec = min(cores, length(data)), type = "PSOCK")
   `%dopar%` <- foreach::`%dopar%`
   doParallel::registerDoParallel(cl)
   if (verbose) {
@@ -390,7 +392,7 @@ eem_interp <- function (data, cores = parallel::detectCores(logical = FALSE),
       eem$x[eem$x < 0] <- 0
     eem
   }
-  stopCluster(cl)
+  parallel::stopCluster(cl)
   class(eem_list) <- "eemlist"
   eem_list
 }

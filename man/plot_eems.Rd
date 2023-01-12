@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_eems}
 \alias{plot_eems}
-\title{Plot EEM's plots as contour plots}
+\title{Exports EEMs contour plots to a file}
 \usage{
 plot_eems(
   prjpath,
@@ -11,7 +11,9 @@ plot_eems(
   sing_plot = T,
   sum_plot = T,
   doc_norm = T,
+  ncol = 4,
   title = "description",
+  save_names = "",
   ...
 )
 }
@@ -26,14 +28,24 @@ plot_eems(
 
 \item{sum_plot}{logical, if TRUE will create and save a plot with all the EEMs in a single plot}
 
-\item{doc_norm}{either TRUE, FALSE, or "both". TRUE or "both" will return EEMs normalized by DOC concentration}
+\item{doc_norm}{either TRUE, FALSE. TRUE return EEMs normalized by DOC concentration}
 
-\item{title}{either a vector the same length as the number of EEMs with titles, or "description" or "sampleID"}
+\item{ncol}{number of columns used in summary plot with all the EEMs samples}
+
+\item{title}{either a dataframe with samples and titles, 'description', 'sampleID', or FALSE (see details)}
+
+\item{save_names}{optional, a character that will be added to the unique ID for plot file names}
 
 \item{...}{arguments to pass to 'ggeems2' function}
 }
 \description{
-Creates a pretty EEM's contour plot with the ability to manually set the intensity
-scale or use an automated one based on the minimum and maximum of the EEM. Option to
-add Coble peak labels to the plot (based off peaks from Coble et al. 2014.
+Will plot EEMs using 'ggeem2' function then will export plots to specified file.
+}
+\details{
+Use 'create_files' function before running this function to ensure file structure is correct for pre-processing.
+
+For title argument, you can specify the title manually, by using a dataframe where the
+first column in the unique ID's for the samples and the second column is the title. If 'description'
+is chosen it will use the description column of the metadata. If 'sampleID' is chosen it will
+use the unique identifier column from the metadata. Lastly if FALSE is chosen no titles will be added.
 }

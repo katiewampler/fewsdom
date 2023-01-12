@@ -1,31 +1,37 @@
-#' Plot EEM's plots as contour plots
+#' Plot EEMs plots as contour plots
 #'
-#' Creates a pretty EEM's contour plot with the ability to manually set the intensity
+#' Creates a pretty EEMs contour plot with the ability to manually set the intensity
 #' scale or use an automated one based on the minimum and maximum of the EEM. Option to
-#' add Coble peak labels to the plot (based off peaks from Coble et al. 2014.
+#' add Coble peak labels to the plot (based off peaks from Coble et al. 2014).
 #'
 #' @importFrom reshape2 melt
 #' @importFrom pals parula ocean.haline cubicl kovesi.rainbow
 #' @importFrom plyr round_any
 #' @importFrom grDevices colorRampPalette
 #' @importFrom gridExtra grid.arrange
+#' @importFrom grDevices dev.off png
 #' @import ggplot2
 #'
-#' @param eem An object of class eem or eemlist, the data you want to plot.
-#' @param manualscale A TRUE or FALSE indicating if you want to specify the minimum and maximum of the intensity scale manually, good for comparisons across samples.
-#' @param manualmax Maximum value for intensity scale.
-#' @param manualmin Minimum value used for intensity scale.
-#' @param nbins The number of bins (and colors) used in the contour plot. Maximum of 24.
-#' @param label_peaks A TRUE or FALSE indicating if you want the main coble peaks annotated on the plot.
-#' @param prec An integer for the number of significant figures used for binning the intensity.
-#' @param palette A character with the color palette to use. Currently 'parula', 'ocean.haline', 'cubicl', and 'kovesi.rainbow' from the 'pals' package are supported.
+#' @param eem an object of class eem or eemlist, the data you want to plot
+#' @param manualscale a logical indicating if you want to specify the minimum and maximum of the intensity scale manually, good for comparisons across samples
+#' @param manualmax maximum value for intensity scale
+#' @param manualmin minimum value used for intensity scale
+#' @param nbins the number of bins (and colors) used in the contour plot, maximum of 24
+#' @param label_peaks a logical indicating if you want the main coble peaks annotated on the plot
+#' @param prec an integer for the number of significant figures used for binning the intensity
+#' @param palette a character with the color palette to use. Currently 'parula', 'ocean.haline', 'cubicl', and 'kovesi.rainbow' from the 'pals' package are supported (and custom 'katie_pal')
 #' @param z_unit either "RU" or "DOC", use "RU" for raman normalized data and "DOC" for raman and DOC normalized data
 #' @returns If class is eem, will return a single plot, if class is an eemlist will return a list of plots
 #' @export
 
 ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
                       nbins = 8, label_peaks=F, prec=2, palette="parula",
-                   z_unit="RU"){
+                      z_unit="RU"){
+  stopifnot(nbins <= 24 |.is_eem(eem) | .is_eemlist(eem) |
+              is.logical(c(manualscale, label_peaks))|
+              is.numeric(c(nbins, prec, nbins))| z_unit %in% c("RU", "DOC")|
+              palette %in% c("parula", "ocean.haline","cubicl", "kovesi", "katie_pal"))
+
   if (.is_eemlist(eem)) {
     res <- lapply(eem, ggeem2, manualscale=manualscale,
                   manualmax=manualmax, manualmin=manualmin,
@@ -69,7 +75,6 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
     labs_df
   } #make pretty even labels
 
-  stopifnot(nbins <= 24, class(eem) == "eem")
   #get color palette
   if(palette == "parula"){
     colors <- pals::parula(n=nbins)
@@ -181,11 +186,11 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
 }
 
 
-#' Plot EEM's plots as contour plots
+#' Exports EEMs contour plots to a file
 #'
-#' Creates a pretty EEM's contour plot with the ability to manually set the intensity
-#' scale or use an automated one based on the minimum and maximum of the EEM. Option to
-#' add Coble peak labels to the plot (based off peaks from Coble et al. 2014.
+#' Will plot EEMs using 'ggeem2' function then will export plots to specified file.
+#'
+#' Use 'create_files' function before running this function to ensure file structure is correct for pre-processing.
 #'
 #' @param prjpath a string indicating the project file
 #' @param meta the metadata associated with the samples
@@ -195,7 +200,7 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
 #' @param doc_norm either TRUE, FALSE. TRUE return EEMs normalized by DOC concentration
 #' @param title either a dataframe with samples and titles, 'description', 'sampleID', or FALSE (see details)
 #' @param ncol number of columns used in summary plot with all the EEMs samples
-#' @param save_names optional, a character that will be added to the unique ID for plot file names.
+#' @param save_names optional, a character that will be added to the unique ID for plot file names
 #' @param ... arguments to pass to 'ggeems2' function
 #' @details For title argument, you can specify the title manually, by using a dataframe where the
 #' first column in the unique ID's for the samples and the second column is the title. If 'description'
@@ -223,13 +228,13 @@ plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
   .save_plots <- function(n, title){
     pl <- raw_plots[[n]]
     name <- eem_names(eem)[n]
-    png(paste0(save_spot, "/", name, save_names, ".png",sep=""),width=20, height = 15, units = 'cm', res = 300)
+    grDevices::png(paste0(save_spot, "/", name, save_names, ".png",sep=""),width=20, height = 15, units = 'cm', res = 300)
     if(title != F){
       pl_title <- .add_title(eem[[n]], title, meta)
       pl <- pl + labs(title=pl_title) + theme(plot.title = element_text(size=10))
     }
     suppressWarnings(print(pl))
-    dev.off()
+    grDevices::dev.off()
   }
   .title_plots <- function(n, title){
     pl <- raw_plots[[n]]
@@ -241,9 +246,10 @@ plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
 
   #check inputs
   stopifnot(.is_eemlist(eem) | file.exists(prjpath) | is.data.frame(meta) |
-            is.logical(sing_plot) | is.logical(sum_plot) | doc_norm %in% c(TRUE, FALSE, "both"))
+            is.logical(sing_plot) | is.logical(sum_plot) |
+              doc_norm %in% c(TRUE, FALSE, "both") | file.exists(prjpath))
 
-  #create spot to put data
+  #have spot to put data
   if(file.exists(paste(prjpath,  "/5_Processed/Figures", sep=""))==F){
     stop("Invalid file structure, please use 'create_files' function to create file for plots within file directory")
   }
@@ -255,60 +261,21 @@ plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
     warning("Metadata didn't contain any DOC data, unable to create DOC normalized plots.")}
 
   #account for doc normalization
-  if(doc_norm ==T){
-    #remove EEMs with no DOC data (or value of 0)
-    EEM_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
-    eem <- eem_exclude(eem,
-                         exclude=list("ex"=c(), "em"=c(),"sample"= EEM_rm ))
-
-    #check if they've been normalized
-    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
-    to_norm <- which(doc_done == F)
-
-    #normalize those that haven't
-    for(x in to_norm){
-      eem_name <- eem[[x]]$sample
-      eem_index <- which(eem_name == meta$unique_ID)
-      eem[[x]]$x <- eem[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
-      attr(eem[[x]], "is_doc_normalized") <- TRUE
-    }
-
-    #double check all are normalized
-    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
-    stopifnot(sum(doc_done==F)==0)
-    }
+  if(doc_norm ==T){eem <- .eem_doc_norm(eem, meta)}
 
   #remove doc normalization if doc_norm is false but sample are doc_normalized
-  if(doc_norm ==F){
-    #check if they've been normalized
-    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
-    to_unnorm <- which(doc_done == T)
-
-    #normalize those that haven't
-    for(x in to_unnorm){
-      eem_name <- eem[[x]]$sample
-      eem_index <- which(eem_name == meta$unique_ID)
-      eem[[x]]$x <- eem[[x]]$x  * as.numeric(meta$DOC_mg_L[eem_index])
-      attr(eem[[x]], "is_doc_normalized") <- FALSE
-    }
-
-    #double check all are normalized
-    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
-    stopifnot(sum(doc_done==T)==0)
-  }
+  if(doc_norm ==F){eem <- .eem_doc_rm(eem, meta)}
 
   z_unit <- ifelse(doc_norm ==T, "DOC", "RU")
   raw_plots <- ggeem2(eem, z_unit=z_unit, ...)
-
 
   # PNGs of plots are written to output directory
   if(sing_plot == T){sapply(1:length(raw_plots), .save_plots, title=title)}
   if(sum_plot == T){
     sum_pl <- lapply(1:length(raw_plots), .title_plots, title=title)
-
     width <- ncol * 20
     height <- ceiling(length(sum_pl)/ncol) * 15
-    png(paste(save_spot, "/EEM_summary_plot", save_names, ".png", sep=""),width=width, height = height, units = 'cm', res = 300)
+    grDevices::png(paste(save_spot, "/EEM_summary_plot", save_names, ".png", sep=""),width=width, height = height, units = 'cm', res = 300)
     suppressWarnings(gridExtra::grid.arrange(grobs = sum_pl, ncol=ncol))
-    dev.off()}
+    grDevices::dev.off()}
   }

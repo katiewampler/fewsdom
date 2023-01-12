@@ -2,20 +2,20 @@
 % Please edit documentation in R/indices.R
 \name{abs_parm}
 \alias{abs_parm}
-\title{Get Absorbance Peaks and Indices}
+\title{Get absorbance peaks and indices}
 \usage{
-abs_parm(abs_data, waves = NULL, meta = meta, r_thresh = 0.8, keep_all = F)
+abs_parm(abs_data, waves = NULL, meta, r_thresh = 0.8, keep_all = F)
 }
 \arguments{
-\item{abs_data}{A dataframe containing the absorbance data, where each column is a sample.}
+\item{abs_data}{a dataframe containing the absorbance data, where each column is a sample}
 
-\item{waves}{Optional, a vector of wavelengths in nm to extract from the absorbance data.}
+\item{waves}{optional, a vector of wavelengths in nm to extract from the absorbance data}
 
-\item{meta}{The metadata table for the sample run, should include DOC data in mg/L.}
+\item{meta}{the metadata table for the sample run, should include DOC data in mg/L}
 
-\item{r_thresh}{The minimum \eqn{\text{R}^{2}} value for the spectral slopes for the slope to be included in the table.}
+\item{r_thresh}{the minimum \eqn{\text{R}^{2}} value for the spectral slopes for the slope to be included in the table}
 
-\item{keep_all}{A logical, TRUE will return all samples even those without DOC data, FALSE will only return samples with DOC data.}
+\item{keep_all}{a logical, TRUE will return all samples even those without DOC data, FALSE will only return samples with DOC data}
 }
 \value{
 Returns a data frame of indices.

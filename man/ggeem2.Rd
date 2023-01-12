@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{ggeem2}
 \alias{ggeem2}
-\title{Plot EEM's plots as contour plots}
+\title{Plot EEMs plots as contour plots}
 \usage{
 ggeem2(
   eem,
@@ -12,28 +12,34 @@ ggeem2(
   nbins = 8,
   label_peaks = F,
   prec = 2,
-  palette = "parula"
+  palette = "parula",
+  z_unit = "RU"
 )
 }
 \arguments{
-\item{eem}{An object of class eem, the data you want to plot.}
+\item{eem}{an object of class eem or eemlist, the data you want to plot}
 
-\item{manualscale}{A TRUE or FALSE indicating if you want to specify the minimum and maximum of the intensity scale manually, good for comparisons across samples.}
+\item{manualscale}{a logical indicating if you want to specify the minimum and maximum of the intensity scale manually, good for comparisons across samples}
 
-\item{manualmax}{Maximum value for intensity scale.}
+\item{manualmax}{maximum value for intensity scale}
 
-\item{manualmin}{Minimum value used for intensity scale.}
+\item{manualmin}{minimum value used for intensity scale}
 
-\item{nbins}{The number of bins (and colors) used in the contour plot. Maximum of 24.}
+\item{nbins}{the number of bins (and colors) used in the contour plot, maximum of 24}
 
-\item{label_peaks}{A TRUE or FALSE indicating if you want the main coble peaks annotated on the plot.}
+\item{label_peaks}{a logical indicating if you want the main coble peaks annotated on the plot}
 
-\item{prec}{An integer for the number of significant figures used for binning the intensity.}
+\item{prec}{an integer for the number of significant figures used for binning the intensity}
 
-\item{palette}{A character with the color palette to use. Currently 'parula', 'ocean.haline', 'cubicl', and 'kovesi.rainbow' from the 'pals' package are supported.}
+\item{palette}{a character with the color palette to use. Currently 'parula', 'ocean.haline', 'cubicl', and 'kovesi.rainbow' from the 'pals' package are supported (and custom 'katie_pal')}
+
+\item{z_unit}{either "RU" or "DOC", use "RU" for raman normalized data and "DOC" for raman and DOC normalized data}
+}
+\value{
+If class is eem, will return a single plot, if class is an eemlist will return a list of plots
 }
 \description{
-Creates a pretty EEM's contour plot with the ability to manually set the intensity
+Creates a pretty EEMs contour plot with the ability to manually set the intensity
 scale or use an automated one based on the minimum and maximum of the EEM. Option to
-add Coble peak labels to the plot (based off peaks from Coble et al. 2014.
+add Coble peak labels to the plot (based off peaks from Coble et al. 2014).
 }

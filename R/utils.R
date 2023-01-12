@@ -1,3 +1,97 @@
-utils::globalVariables(c("abs_wave","sampsascol", "demopath",
-                         "DOC_norm_index","x","y","z", "eem_test", ".percent_dif",
-                         "makeCluster", "%dopar%","i","em", "ex", ".", "stopCluster"))
+utils::globalVariables(c("%dopar%","i", ".",
+                         "...","wavelength", "em", "z", "ex",
+                         "x","y"))
+
+
+#' Create file structure
+#'
+#' Takes a file with EEM's and absorbance data and creates subfolders to store
+#' raw and processed data, plots, and output tables
+#'
+#' @param prjpath a string indicating the project file with the data
+#' @export
+#'
+
+create_files <- function(prjpath){
+  stopifnot(is.character(prjpath)|file.exists(prjpath))
+  #put in files
+  dir.create(paste(prjpath, "/1_Absorbance", sep=""), showWarnings = F)
+  dir.create(paste(prjpath, "/2_Blanks", sep=""), showWarnings = F)
+  dir.create(paste(prjpath, "/3_Samples", sep=""), showWarnings = F)
+  dir.create(paste(prjpath, "/4_Clean_Absorbance", sep=""), showWarnings = F) #create file for clean files if it doesn't exist yet
+  dir.create(paste(prjpath, "/5_Processed", sep=""), showWarnings = F)
+  dir.create(paste(prjpath,  "/5_Processed/Figures", sep=""), showWarnings = F)
+}
+
+#' Checks if object is an eemlist
+#'
+#' @param eem an object
+#' @noRd
+.is_eemlist <- function(eem) {
+  ifelse(class(eem) == "eemlist", TRUE, FALSE)
+}
+
+#' Checks if object is an eem
+#'
+#' @param eem an object
+#' @noRd
+.is_eem <- function(eem) {
+  ifelse(class(eem) == "eem", TRUE, FALSE)
+}
+
+#' DOC Normalizes eems data
+#'
+#' @param eem object of class eem or eemlist
+#' @param meta dataframe with metadata, needs to have doc data
+#' @noRd
+#'
+.eem_doc_norm <- function(eem, meta){
+  #remove EEMs with no DOC data (or value of 0)
+  EEM_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
+  eem <- eem_exclude(eem,
+                   exclude=list("ex"=c(), "em"=c(),"sample"= EEM_rm ))
+
+  #check if they've been normalized
+  doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+  to_norm <- which(doc_done == F)
+
+  #normalize those that haven't
+  for(x in to_norm){
+    eem_name <- eem[[x]]$sample
+    eem_index <- which(eem_name == meta$unique_ID)
+    eem[[x]]$x <- eem[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
+    attr(eem[[x]], "is_doc_normalized") <- TRUE
+  }
+
+  #double check all are normalized
+  doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+  stopifnot(sum(doc_done==F)==0)
+  return(eem)
+}
+
+#' Removes DOC normalization on eems data
+#'
+#' Removes DOC normalization if sample are DOC normalized
+#' @param eem object of class eem or eemlist
+#' @param meta dataframe with metadata, needs to have doc data
+#' @noRd
+.eem_doc_rm <- function(eem, meta){
+  #check if they've been normalized
+  doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+  to_unnorm <- which(doc_done == T)
+
+  #unnormalize those that haven't
+  for(x in to_unnorm){
+    eem_name <- eem[[x]]$sample
+    eem_index <- which(eem_name == meta$unique_ID)
+    eem[[x]]$x <- eem[[x]]$x  * as.numeric(meta$DOC_mg_L[eem_index])
+    attr(eem[[x]], "is_doc_normalized") <- FALSE
+  }
+
+  #double check all are normalized
+  doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+  stopifnot(sum(doc_done==T)==0)
+  return(eem)
+}
+
+

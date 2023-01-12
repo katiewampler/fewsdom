@@ -2,62 +2,23 @@
 #'
 #' Takes the Aqualog files that have been renamed and put in separate folders within
 #' the main directory via the 'clean_files' function and loads them into R as
-#' eem lists. It will also modify the metadata table to link the sample, blank, and
-#' absorbance data.
+#' eemlists. It will also check to see if maximum absorbance is below 0.3.
 #'
 #' @importFrom utils zip
 #' @importFrom eemR eem_read
 #'
 #' @param prjpath The file path of the main file directory where data is located
-#' @param
 #' @export
 #'
 
 load_eems <- function(prjpath){
+  stopifnot(is.character(prjpath) | file.exists(prjpath))
   #load in EEM's data
   X <- eemR::eem_read(paste(prjpath, "/3_Samples/",sep=""), recursive = F, import_function = "aqualog")
   X_blk <- eemR::eem_read(paste(prjpath, "/2_Blanks/",sep=""), recursive = F, import_function = "aqualog")
 
   #load in absorbance data
   Sabs <- absorbance_read(paste(prjpath, "/4_Clean_Absorbance", sep=""))
-
-  #match EEM and absorbance files with information from metadata
-  for(m in meta$index){
-    x <- which(m == meta$index)
-    absname <- paste(meta$unique_ID[x], "_Abs", sep="")
-    blankname <- paste(meta$unique_ID[x], "_blank", sep="")
-    abs_col <- which(meta$unique_ID[x] == colnames(Sabs))
-    if(length(abs_col) == 0){
-      #see if was missing 0 before site number
-      unique_ID <- paste(str_sub(meta$unique_ID[x], 1,2), str_sub(meta$unique_ID[x], 4,-1), sep="")
-      absname <- paste(unique_ID, "_Abs", sep="")
-      blankname <- paste(unique_ID, "_blank", sep="")
-      abs_col <- which(unique_ID == colnames(Sabs))
-      if(length(abs_col) == 0){
-        warning(paste("Sample", absname, "wasn't found in the file. Removing from metadata"))
-        meta <- meta[-x,]
-      } else{
-        new_unique_ID <- meta$unique_ID[x]
-        X <- eem_name_replace(X, unique_ID, new_unique_ID)
-        X_blk <- eem_name_replace(X_blk, unique_ID, new_unique_ID)
-        colnames(Sabs)[colnames(Sabs)==unique_ID] <- new_unique_ID
-
-        df <- data.frame(absname = absname, blankname=blankname , eemname=meta$unique_ID[x], abs_col=abs_col)
-        if(x==1){
-          abs_index <- df
-        } else{abs_index <- rbind(abs_index, df)}
-      }} else{
-        df <- data.frame(absname = absname, blankname=blankname , eemname=meta$unique_ID[x], abs_col=abs_col)
-        if(x==1){
-          abs_index <- df
-        } else{abs_index <- rbind(abs_index, df)}
-      }
-
-  }
-
-  #merge with metadata
-  meta <- merge(meta, abs_index, by.x="unique_ID", by.y="eemname")
-  row.names(meta) <- meta$unique_ID
 
   #check absorbance (if over 0.3) will return warning for samples above, else will just run in background
   for(c in 2:ncol(Sabs)){
@@ -67,15 +28,18 @@ load_eems <- function(prjpath){
       warning(paste("Sample",colnames(Sabs)[c], "has an aborbance of", round(max,3), "please dillute", sep=" "))
     }
   }
-}
 
+  return(list(X, X_blk, Sabs))
+}
 
 #' Reading absorbance data from txt and csv files
 #'
 #' Exact function from 'staRdom' package, extracted to prevent orphan package warnings.
 #' Reading absorbance data from txt and csv files.
 #'
-#' @importFrom utils zip
+#' @importFrom stringr str_extract_all regex str_remove str_extract
+#' @importFrom dplyr arrange
+#' @importFrom stats setNames
 #'
 #' @param absorbance_path directory containing absorbance data files or path to single file. See details for format of absorbance data.
 #' @param order logical, data is ordered according to wavelength
@@ -84,11 +48,10 @@ load_eems <- function(prjpath){
 #' @param sep optional, either you set a field separator or it is tried to be determined automatically
 #' @param verbose logical, provide more information
 #' @param cores number of CPU cores to be used simultanuously
-#'
+#' @noRd
+
 absorbance_read <- function (absorbance_path, order = TRUE, recursive = TRUE, dec = NULL,
-                         sep = NULL, verbose = FALSE, cores = parallel::detectCores(logical = FALSE),
-                         ...)
-{
+                         sep = NULL, verbose = FALSE, cores = parallel::detectCores(logical = FALSE)){
   if (dir.exists(absorbance_path)) {
     abs_data <- list.files(absorbance_path, full.names = TRUE,
                            recursive = recursive, no.. = TRUE, include.dirs = FALSE,
@@ -102,28 +65,28 @@ absorbance_read <- function (absorbance_path, order = TRUE, recursive = TRUE, de
   if (length(abs_data) < 1)
     stop("No valid files found in absorbance_path!")
   cl <- parallel::makeCluster(min(cores, length(abs_data)), type = "PSOCK")
-  clusterExport(cl, c("dec", "sep", "verbose"), envir = environment())
-  clusterEvalQ(cl, require(dplyr))
-  clusterEvalQ(cl, require(stringr))
-  abs_data <- parLapply(cl, abs_data, function(tab) {
+  parallel::clusterExport(cl, c("dec", "sep", "verbose"), envir = environment())
+  parallel::clusterEvalQ(cl, require(dplyr))
+  parallel::clusterEvalQ(cl, require(stringr))
+  abs_data <- parallel::parLapply(cl, abs_data, function(tab) {
     tryCatch({
       rawdata <- readLines(tab)
-      data <- rawdata %>% sapply(str_remove, pattern = "([^0-9]*$)")
+      data <- rawdata %>% sapply(stringr::str_remove, pattern = "([^0-9]*$)")
       first_number <- min(which((substr(data, 1, 1) %>%
                                    grepl("[0-9]", .))))
       last_number <- max(which((substr(data, 1, 1) %>%
                                   grepl("[0-9]", .))))
       if (is.null(sep) | is.null(dec)) {
-        nsepdec <- data[first_number] %>% str_extract_all("[^-0-9eE]") %>%
+        nsepdec <- data[first_number] %>% stringr::str_extract_all("[^-0-9eE]") %>%
           unlist()
-        example_number <- data[first_number] %>% str_extract("([-]?[0-9]+[.,]?[0-9]+[eE]?[-0-9]+)$")
+        example_number <- data[first_number] %>% stringr::str_extract("([-]?[0-9]+[.,]?[0-9]+[eE]?[-0-9]+)$")
         if (is.null(dec) & length(nsepdec) > 1)
-          dec <- example_number %>% str_replace("([-0-9eE]+)([.,]?)([-0-9eE]*)",
+          dec <- example_number %>% stringr::str_replace("([-0-9eE]+)([.,]?)([-0-9eE]*)",
                                                 "\\2")
         if (is.null(sep))
           sep <- gsub(pattern = dec, replacement = "",
                       x = data[first_number], fixed = TRUE) %>%
-          str_extract(paste0("[^-0-9eE", dec, "]"))
+          stringr::str_extract(paste0("[^-0-9eE", dec, "]"))
         if (verbose)
           warning("processing", tab, ": using", sep,
                   "as field separator and", dec, "as decimal separator.",
@@ -139,7 +102,7 @@ absorbance_read <- function (absorbance_path, order = TRUE, recursive = TRUE, de
       attr(table, "location") <- rep(tab, ncol(table) -
                                        1)
       if (ncol(table) == 2) {
-        samples <- tab %>% basename() %>% str_replace_all(regex(".txt$|.csv$",
+        samples <- tab %>% basename() %>% stringr::str_replace_all(stringr::regex(".txt$|.csv$",
                                                                 ignore_case = TRUE), "")
       }
       else {
@@ -147,12 +110,12 @@ absorbance_read <- function (absorbance_path, order = TRUE, recursive = TRUE, de
           unlist() %>% matrix(ncol = length(.), byrow = TRUE) %>%
           data.frame(stringsAsFactors = FALSE) %>% .[-1]
       }
-      table <- table %>% setNames(c("wavelength", samples))
+      table <- table %>% stats::setNames(c("wavelength", samples))
     }, error = function(err) {
       stop("Error while reading ", tab, ": ", err)
     })
   })
-  stopCluster(cl)
+  parallel::stopCluster(cl)
   locations <- lapply(abs_data, function(tab) {
     attr(tab, "location")
   }) %>% unlist()
@@ -160,7 +123,48 @@ absorbance_read <- function (absorbance_path, order = TRUE, recursive = TRUE, de
     abs_data <- abs_data[[1]] %>% as.data.frame()
   else abs_data <- abs_data %>% list_join(by = "wavelength")
   if (order)
-    abs_data <- abs_data %>% arrange(wavelength)
+    abs_data <- abs_data %>% dplyr::arrange(wavelength)
   attr(abs_data, "location") <- locations
   abs_data
+}
+
+
+#' Full join of a list of data frames.
+#'
+#' Exact function from 'staRdom' package, extracted to prevent orphan package warnings.
+#' Full join of a list of data frames.
+#'
+#' @importFrom stringr str_extract_all
+#'
+#' @param df_list list of data frames to by joined
+#' @param by character vector containing information how to join data frames. Format to be according to by in full_join. Each data frame has to contain the column(s) used for joining.
+#' @noRd
+list_join <- function (df_list, by)
+{
+  df <- df_list[[1]]
+  for (n in 2:length(df_list)) {
+    df <- dplyr::full_join(df, df_list[[n]], by = by)
+  }
+  df
+}
+
+#' Replace matched patterns in sample names
+#'
+#' Exact function from 'staRdom' package, extracted to prevent orphan package warnings.
+#' Replace matched patterns in sample names.
+#'
+#' @importFrom stringr str_extract_all
+#'
+#' @param eem_list data of class eemlist
+#' @param pattern	 character vector containing pattern to look for.
+#' @param replacement character vector of replacements. Has to have the same length as pattern
+#' @noRd
+eem_name_replace <- function (eem_list, pattern, replacement)
+{eem_list <- lapply(eem_list, function(eem) {
+    eem$sample <- eem$sample %>% stringr::str_replace_all(pattern,
+                                                          replacement)
+    eem
+  })
+  class(eem_list) <- "eemlist"
+  eem_list
 }

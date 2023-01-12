@@ -2,26 +2,29 @@
 % Please edit documentation in R/scattering.R
 \name{raman}
 \alias{raman}
-\title{Removes Raman Scattering with Optional Interpolation}
+\title{Removes raman scattering with optional interpolation}
 \usage{
 raman(
   eem,
   raman_mask = c(10, 10, 1.5, 1.5),
   width_method = "auto",
   raman_interp = c(T, T),
-  process_file = NULL
+  process_file = NULL,
+  verbose = F
 )
 }
 \arguments{
-\item{eem}{An object of class eemlist.}
+\item{eem}{an object of class eemlist}
 
-\item{raman_mask}{A vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line. Since you cannot use the auto method for second order raman this must be specified.}
+\item{raman_mask}{a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified}
 
-\item{width_method}{Either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function.}
+\item{width_method}{either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function}
 
-\item{raman_interp}{A vector of length two, either T or F, specifying whether the first and second order lines should be interpolated. The first position refers to the first order line. The way the code is written you cannot interpolate the first order line and not the second.}
+\item{raman_interp}{a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second}
 
-\item{process_file}{A file path to a .txt file, used to track processing changes to EEMs.}
+\item{process_file}{a file path to a .txt file, used to track processing changes to EEMs}
+
+\item{verbose}{a logical, if TRUE will print out widths used to mask via the auto width method}
 }
 \description{
 Will remove both first and second order raman scattering with the option to interpolate

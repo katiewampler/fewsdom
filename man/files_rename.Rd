@@ -2,9 +2,9 @@
 % Please edit documentation in R/rename_files.R
 \name{files_rename}
 \alias{files_rename}
-\title{Rename Default File Names from Aqualog}
+\title{Rename default file names from Aqualog}
 \usage{
-files_rename(meta = meta, prjpath)
+files_rename(meta, prjpath)
 }
 \arguments{
 \item{meta}{the metadata table for the sample run}

@@ -2,33 +2,37 @@
 % Please edit documentation in R/indices.R
 \name{get_indices}
 \alias{get_indices}
-\title{Export Absorbance and Fluorencence Indices and Peaks to an Excel File}
+\title{Export absorbance and fluorencence indices and peaks to an excel file}
 \usage{
 get_indices(
   eem_list,
   abs_data,
   meta,
-  path,
+  prjpath,
   doc_norm = "both",
   sampsascol = F,
   waves = NULL
 )
 }
 \arguments{
-\item{eem_list}{An object of class eem or eemlist.}
+\item{eem_list}{an object of class eem or eemlist}
 
-\item{abs_data}{A dataframe containing the absorbance data.}
+\item{abs_data}{a dataframe containing the absorbance data}
 
-\item{meta}{The metadata associated with the samples.}
+\item{meta}{the metadata associated with the samples}
 
-\item{path}{Location to save the exported absorbance and fluorescence metrics.}
+\item{prjpath}{location to save the exported absorbance and fluorescence metrics}
 
-\item{doc_norm}{Either TRUE, FALSE or "both" indicating if peaks should be normalized by DOC concentrations.}
+\item{doc_norm}{either TRUE, FALSE or "both" indicating if peaks should be normalized by DOC concentrations}
 
-\item{sampsascol}{A logical indicating how results should be oriented, TRUE puts samples as columns, FALSE puts samples as rows.}
+\item{sampsascol}{a logical indicating how results should be oriented, TRUE puts samples as columns, FALSE puts samples as rows}
 
-\item{waves}{Optional, a vector of wavelengths in nm to extract from the absorbance data.}
+\item{waves}{optional, a vector of wavelengths in nm to extract from the absorbance data}
 }
 \description{
-Export Absorbance and Fluorencence Indices and Peaks to an Excel File
+Uses 'eem_coble_peaks2' and 'abs_parm' functions to obtain absorbance and
+fluoresence indices for an eemlist. Saves data in an excel file.
+}
+\details{
+Use 'clean_files' function before running this function to ensure file structure is correct for pre-processing.
 }

@@ -5,7 +5,7 @@
 \alias{sample_metadata}
 \title{An example of ideal metadata formatting for a sample set run on the Aqualog}
 \format{
-A data frame with 22 rows and 11 columns:
+a data frame with 22 rows and 11 columns:
 \describe{
   \item{index}{The numeric order of entry (e.g. 1, 2, 3, 4, etc…)}
   \item{analysis_date}{The date the samples were run on instrument (not collected in the field)}

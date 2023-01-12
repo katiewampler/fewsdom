@@ -2,26 +2,26 @@
 % Please edit documentation in R/scattering.R
 \name{eem_remove_scattering2}
 \alias{eem_remove_scattering2}
-\title{Removes Rayleigh and Raman Scattering}
+\title{Removes rayleigh and raman scattering}
 \usage{
 eem_remove_scattering2(
   eem,
-  up_width = 10,
-  down_width = 10,
   type = "raman",
-  order = 1
+  order = 1,
+  up_width = 10,
+  down_width = 10
 )
 }
 \arguments{
-\item{eem}{An object of class eemlist or eem.}
+\item{eem}{an object of class eemlist or eem}
 
-\item{up_width}{An integer number specifying the width in nm for the cut above the emission line.}
+\item{type}{a string, either "raman" or "rayleigh"}
 
-\item{down_width}{An integer number specifying the width in nm for the cut below the emission line.}
+\item{order}{an integer number, either 1 (first order) or 2 (second order)}
 
-\item{type}{A string, either "raman" or "rayleigh".}
+\item{up_width}{an integer number specifying the width in nm for the cut above the emission line}
 
-\item{order}{An integer number, either 1 (first order) or 2 (second order).}
+\item{down_width}{an integer number specifying the width in nm for the cut below the emission line}
 }
 \description{
 Based on 'eem_remove_scattering' function from eemR package, added functionality

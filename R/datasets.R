@@ -4,7 +4,7 @@
 #' smooth use with the functions it is recommended to use this sample as a
 #' template for the metadata.
 #'
-#' @format A data frame with 22 rows and 11 columns:
+#' @format a data frame with 22 rows and 11 columns:
 #' \describe{
 #'   \item{index}{The numeric order of entry (e.g. 1, 2, 3, 4, etc…)}
 #'   \item{analysis_date}{The date the samples were run on instrument (not collected in the field)}

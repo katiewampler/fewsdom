@@ -2,33 +2,33 @@
 % Please edit documentation in R/get_doc.R
 \name{get_doc}
 \alias{get_doc}
-\title{Input DOC data into Metadata Table}
+\title{Input DOC data into metadata}
 \usage{
 get_doc(
   doc_file,
-  doc_sheet,
+  doc_sheet = NULL,
   doc_column,
   name_column,
   nskip = 0,
   doc_delim = "-",
   meta_file,
-  meta_sheet,
+  meta_sheet = NULL,
   meta_delim,
   rewrite = T
 )
 }
 \arguments{
-\item{doc_file}{a string of the file path of the doc file, can be .xlsx or .csv}
+\item{doc_file}{a string of the file path of the DOC file, can be .xlsx or .csv}
 
-\item{doc_sheet}{a string of the sheet name of the doc results, only required if the doc file is an .xlsx file}
+\item{doc_sheet}{a string of the sheet name of the DOC results, only required if the DOC file is an .xlsx file}
 
-\item{doc_column}{a numeric indicating which column the doc results are stored in in the doc file}
+\item{doc_column}{a numeric indicating which column the DOC results are stored in in the DOC file}
 
-\item{name_column}{a numeric indicating which column the sample/site names are stored in the doc file}
+\item{name_column}{a numeric indicating which column the sample/site names are stored in the DOC file}
 
-\item{nskip}{a numeric indicating a number of lines to skip when reading in the doc file, optional}
+\item{nskip}{a numeric indicating a number of lines to skip when reading in the DOC file, optional}
 
-\item{doc_delim}{a string indicating the separation between site name and other identifiers in the doc data, it will only keep the first piece}
+\item{doc_delim}{a string indicating the separation between site name and other identifiers in the DOC data, it will only keep the first piece}
 
 \item{meta_file}{a string indicating the file path of the metadata, can be .xlsx or .csv}
 

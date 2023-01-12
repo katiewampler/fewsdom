@@ -2,20 +2,20 @@
 % Please edit documentation in R/scattering.R
 \name{find_cut_width}
 \alias{find_cut_width}
-\title{Finds Optimal Scattering Cut Widths Based on EEM set}
+\title{Finds optimal scattering cut widths based on EEM set}
 \usage{
 find_cut_width(eem, type = "rayleigh", order = 1)
 }
 \arguments{
-\item{eem}{An object of class eemlist.}
+\item{eem}{an object of class eemlist}
 
-\item{type}{A string, either "raman" or "rayleigh".}
+\item{type}{a string, either "raman" or "rayleigh"}
 
-\item{order}{An integer number, either 1 (first order) or 2 (second order).}
+\item{order}{an integer number, either 1 (first order) or 2 (second order)}
 }
 \description{
-Takes a group of eems and uses peak picking to determine how wide the cut should be
-for each scattering line (does not work for 2nd order raman). Uses the exciatation at 280nm
+Takes a group of EEMs and uses peak picking to determine how wide the cut should be
+for each scattering line (does not work for 2nd order raman). Uses the excitation at 280nm
 and finds the start and end of the peak. If the function can't find one, it will default to NA
 for that sample. Median of the peak widths is reported for use in the 'remove_scattering' function.
 Should be performed on data that is untransformed besides a blank subtraction.

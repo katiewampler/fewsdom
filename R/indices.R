@@ -1,10 +1,10 @@
-#' Cleanly Transpose Data
+#' Cleanly transpose data
 #'
 #' Takes a dataframe and transposes it (turn the rows to columns and columns to rows).
 #'
-#' @param df A dataframe that you want to transpose.
-#' @returns A transposed dataframe.
-#' @export
+#' @param df a dataframe that you want to transpose
+#' @returns a transposed dataframe.
+#' @noRd
 
 #functions for getting indices
 clean_transpose <- function(df){
@@ -15,7 +15,7 @@ clean_transpose <- function(df){
   df_flip
 }
 
-#' Get Absorbance Peaks and Indices
+#' Get absorbance peaks and indices
 #'
 #' Takes a dataframe of absorbance data and calculates optical properties for
 #' each sample. If data was collected at greater than 1 nm intervals, data will
@@ -46,17 +46,19 @@ clean_transpose <- function(df){
 #' and generally increases on irradiation.
 #'
 #' @importFrom stats approx
-#' @param abs_data A dataframe containing the absorbance data, where each column is a sample.
-#' @param waves Optional, a vector of wavelengths in nm to extract from the absorbance data.
-#' @param meta The metadata table for the sample run, should include DOC data in mg/L.
-#' @param r_thresh The minimum \eqn{\text{R}^{2}} value for the spectral slopes for the slope to be included in the table.
-#' @param keep_all A logical, TRUE will return all samples even those without DOC data, FALSE will only return samples with DOC data.
+#' @param abs_data a dataframe containing the absorbance data, where each column is a sample
+#' @param waves optional, a vector of wavelengths in nm to extract from the absorbance data
+#' @param meta the metadata table for the sample run, should include DOC data in mg/L
+#' @param r_thresh the minimum \eqn{\text{R}^{2}} value for the spectral slopes for the slope to be included in the table
+#' @param keep_all a logical, TRUE will return all samples even those without DOC data, FALSE will only return samples with DOC data
 #' @returns Returns a data frame of indices.
 #' @references Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing, B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved organic matter (DOM): Effects of biological and photolytic degradation. Limnology and Oceanography, 61(3), 1015–1032. https://doi.org/10.1002/lno.10270
 #' @export
 
-abs_parm <- function(abs_data, waves=NULL, meta=meta,
+abs_parm <- function(abs_data, waves=NULL, meta,
                      r_thresh=0.8, keep_all=F){
+  stopifnot(is.data.frame(c(abs_data, meta)) | is.numeric(r_thresh)|is.logical(keep_all))
+
   #interpolate data to find values that don't fall on the excitation wavelengths used
   data <- lapply(abs_data[,-1], function(x) approx(abs_data$wavelength, x, xout=c(249:791))[[2]])
   data <- as.data.frame(data)
@@ -72,17 +74,17 @@ abs_parm <- function(abs_data, waves=NULL, meta=meta,
   abs_out$sample <- colnames(abs_data)[2:ncol(abs_data)]
 
   #add DOC data to table for specific values
-  abs_out$DOC <- NA
+  abs_out$DOC_mgL <- NA
   for(m in meta$index){
     x <- which(m == meta$index)
     abs_col <- which(meta$unique_ID[x] == abs_out$sample)
-    abs_out$DOC[abs_col] <- meta$DOC_mg_L[x]}
+    abs_out$DOC_mgL[abs_col] <- meta$DOC_mg_L[x]}
 
   #extract data for suva and sva measurements
   for(x in c(254,280, 350, 370, 412,440,480,510,532,555)){
     row_num <- which(data$wavelength == x) #row in absorbance data
     col_num <- which(stringr::str_detect(colnames(abs_out), as.character(x))==T)[1] #location in output table
-    abs_out[,col_num] <- as.numeric(data[row_num, 1:(ncol(data)-1)]) / abs_out$DOC * 100 #put data in column
+    abs_out[,col_num] <- as.numeric(data[row_num, 1:(ncol(data)-1)]) / abs_out$DOC_mgL * 100 #put data in column
   }
 
   #extract data for added absorbance wavelengths
@@ -165,17 +167,17 @@ abs_parm <- function(abs_data, waves=NULL, meta=meta,
 
   #remove samples missing DOC
   if(keep_all == F){
-    abs_out <- abs_out[is.na(abs_out$DOC) ==F,]
+    abs_out <- abs_out[is.na(abs_out$DOC_mgL) ==F,]
   }
   abs_out
 
 }
 
-#' Get Coble Peaks and Other Fluorescence Indicies
+#' Get Coble Peaks and other fluorescence indicies
 #'
 #' Modified from 'eem_coble_peaks' from eemR package to include some additional indices and
 #' modified definitions of Coble peaks.  For indices that are ratios, the values in the ratio
-#' must be 5 times (or specifed amount) greater than the average values above 700nm (considered noise). If the
+#' must be 5 times (or specifed amount) greater than the area below the 1:1 line (considered noise). If the
 #' desired wavelength is not explicitly measured the EEM will be interpolated using
 #' the interp2 function from the pracma library.
 #'
@@ -185,7 +187,7 @@ abs_parm <- function(abs_data, waves=NULL, meta=meta,
 #'
 #' Peak T (pT): ex = 270:280 nm, em = 320:350 nm, Tryptophan-like
 #'
-#' Peak A (pA): ex = 250:260 nm, em = 380:480 nm, Humic-like
+#' Peak A (pA): ex = 250:260 nm, em = 380:480 nm, Humic-like.
 #'
 #' Peak M (pM): ex = 310:320 nm, em = 380:420 nm, Marine humic-like
 #'
@@ -228,48 +230,52 @@ abs_parm <- function(abs_data, waves=NULL, meta=meta,
 #' autochthonous DOM.
 #'
 #'
-#' @param eem An object of class eem or eemlist.
-#' @param absorbance A dataframe of absorbance data matching the samples, used to calculate relative fluorescence efficiency
-#' @param verbose Logical determining if additional messages should be printed.
-#' @param noise_ratio Numeric indicating the noise threshold for ratio calculations.
-#' @returns Returns a data frame containing fluorescence peaks and indices for each sample.
+#' @param eem an object of class eem or eemlist
+#' @param abs_data dataframe of absorbance data matching the samples, used to calculate relative fluorescence efficiency
+#' @param noise_ratio numeric indicating the noise threshold for ratio calculations
+#' @param verbose logical determining if additional messages should be printed
+#' @returns Returns a data frame containing fluorescence peaks and indices for each sample
 #' @references Coble, P. G., Lead, J., Baker, A., Reynolds, D. M., & Spencer, R. G. M. (Eds.). (2014). Aquatic Organic Matter Fluorescence. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9781139045452
 #' @references Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing, B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved organic matter (DOM): Effects of biological and photolytic degradation. Limnology and Oceanography, 61(3), 1015–1032. https://doi.org/10.1002/lno.10270
+#' @export
 #'
-eem_coble_peaks2 <- function (eem, absorbance, noise_ratio = 5, verbose = FALSE){
+eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   #subfunctions for function
-  .is_eemlist <- function(eem) {
-    ifelse(class(eem) == "eemlist", TRUE, FALSE)
-  }
-  .is_eem <- function(eem) {
-    ifelse(class(eem) == "eem", TRUE, FALSE)
-  }
   msg_warning_wavelength <- function() {
     msg <- "This metric uses either excitation or emission wavelengths that were not present in the data. Data has been interpolated to fit the requested wavelengths."
     return(msg)
   }
   #function to interpolate an eem's area over a range of excitation and emissions
   #will report the maximum value
-  max_peak_val <- function(ex, em){
-    ex_p <- rep(ex, length(em))
-    em_p <- rep(em, length(ex))
-    em_p <- em_p[order(em_p)]
-    int_res <- pracma::interp2(eem$ex, eem$em, eem$x, ex_p, em_p)
-    max_res <- max(int_res, na.rm=T)
+  max_peak_val <- function(ex, em, eem){
+    if(max(ex) <= max(eem$ex) & max(em) <= max(eem$em) &
+       min(ex) >= min(eem$ex) & min(em) >= min(eem$em)){
+      ex_p <- rep(ex, length(em))
+      em_p <- rep(em, length(ex))
+      em_p <- em_p[order(em_p)]
+      int_res <- pracma::interp2(eem$ex, eem$em, eem$x, ex_p, em_p)
+      max_res <- max(int_res, na.rm=T)
+    }else{
+      max_res <- NA
+    }
     max_res
+
   }
   #gets ratio after checking for noise thresholds
   ratio_val <-function(x, y, noise){
-    if(x >= noise & y >= noise){ratio <- x/y}else{ratio <- NA}
+    if(is.na(x) == F & is.na(y) == F){
+      if(x >= noise & y >= noise){ratio <- x/y}else{ratio <- NA}
+    }else{ratio <- NA}
     ratio
   }
 
   #function checks
-  stopifnot(.is_eemlist(eem) | .is_eem(eem))
+  stopifnot(.is_eemlist(eem) | .is_eem(eem) | is.data.frame(abs_data)|
+              is.numeric(noise_ratio) | is.logical(verbose))
 
   #run over entire eemlist is eemlist
   if (.is_eemlist(eem)) {
-    res <- lapply(eem, eem_coble_peaks2, noise_ratio = noise_ratio, verbose = verbose, absorbance=absorbance)
+    res <- lapply(eem, eem_coble_peaks2, noise_ratio = noise_ratio, verbose = verbose, abs_data=abs_data)
     res <- dplyr::bind_rows(res)
     return(res)
   }
@@ -292,19 +298,26 @@ eem_coble_peaks2 <- function (eem, absorbance, noise_ratio = 5, verbose = FALSE)
     warning(msg_warning_wavelength(), call. = FALSE)
   }
 
-  #get noise for checking ratios
-  noise <- eem$x[1:24,72:104]
+  #get noise for checking ratios, grabs area below 1:1 line
+  noise <- eem
+  em <- noise$em
+  ex <- noise$ex
+  x <- noise$x
+  ind <- mapply(function(x) em > x, ex)
+  ind <- ifelse(ind == 1, NA, 1)
+  x <- x * ind
+  noise <- mean(x, na.rm=T)
   noise_val <- mean(noise) * noise_ratio #data must be 5 times higher than noise or it won't calculate ratios
 
   #get coble peak values
-  pB <- max_peak_val(270:280, 300:320)
-  pT <- max_peak_val(270:280, 320:350)
-  pA <- max_peak_val(250:260, 380:480)
-  pM <- max_peak_val(310:320, 380:420)
-  pC <- max_peak_val(330:350, 420:480)
-  pD <- max_peak_val(390, 509)
-  pE <- max_peak_val(455, 521)
-  pN <- max_peak_val(280, 370)
+  pB <- max_peak_val(270:280, 300:320, eem)
+  pT <- max_peak_val(270:280, 320:350, eem)
+  pA <- max_peak_val(250:260, 380:480, eem)
+  pM <- max_peak_val(310:320, 380:420, eem)
+  pC <- max_peak_val(330:350, 420:480, eem)
+  pD <- max_peak_val(390, 509, eem)
+  pE <- max_peak_val(455, 521, eem)
+  pN <- max_peak_val(280, 370, eem)
 
   #peak ratios
   rAT <- ratio_val(pA, pT, noise_val)
@@ -337,7 +350,7 @@ eem_coble_peaks2 <- function (eem, absorbance, noise_ratio = 5, verbose = FALSE)
 
   #fresh
   fluo_380 <- pracma::interp2(eem$ex, eem$em, eem$x, 310, 380)
-  fluo_420_435 <- max_peak_val(310, 420:435)
+  fluo_420_435 <- max_peak_val(310, 420:435, eem)
   if(fluo_380 >= noise_val & fluo_420_435 >= noise_val){
     fresh <- fluo_380/fluo_420_435
   } else{fresh <- NA}
@@ -350,30 +363,47 @@ eem_coble_peaks2 <- function (eem, absorbance, noise_ratio = 5, verbose = FALSE)
   } else{BIX <- NA}
 
   #RFE
-  abs_col <- which(eem$sample == colnames(absorbance)) #get sample column
+  abs_col <- which(eem$sample == colnames(abs_data)) #get sample column
   abs_370 <- stats::approx(abs_data$wavelength, abs_data[,abs_col], 370)[[2]] #interpolate at 370
   RFE <- pracma::interp2(eem$ex, eem$em, eem$x, 370, 460) / abs_370
 
+  output <- data.frame(sample = eem$sample, pB=pB, pT=pT, pA=pA, pM=pM,
+                       pC=pC, pD=pD, pE=pE, pN=pN, rAT=rAT, rCA=rCA,
+                       rCM=rCM, rCT=rCT, FI=FI, HIX=HIX, fresh=fresh,
+                       RFE=RFE, BIX=BIX, stringsAsFactors = FALSE)
+
+  #clean a little
+  output <- do.call(data.frame,                      # Replace Inf in data by NA
+                     lapply(output,
+                            function(x) replace(x, is.infinite(x), NA)))
+
+  output <- do.call(data.frame,                      # Replace nan in data by NA
+                    lapply(output,
+                           function(x) replace(x, is.nan(x), NA)))
   #print data
-  return(data.frame(sample = eem$sample, pB=pB, pT=pT, pA=pA, pM=pM,
-                    pC=pC, pD=pD, pE=pE, pN=pN, rAT=rAT, rCA=rCA,
-                    rCM=rCM, rCT=rCT, FI=FI, HIX=HIX, fresh=fresh,
-                    RFE=RFE, BIX=BIX, stringsAsFactors = FALSE))
+  return(output)
 }
 
 
-#' Export Absorbance and Fluorencence Indices and Peaks to an Excel File
+#' Export absorbance and fluorencence indices and peaks to an excel file
 #'
+#' Uses 'eem_coble_peaks2' and 'abs_parm' functions to obtain absorbance and
+#' fluoresence indices for an eemlist. Saves data in an excel file.
 #'
+#' Use 'clean_files' function before running this function to ensure file structure is correct for pre-processing.
 #'
-#' @param eem_list An object of class eem or eemlist.
-#' @param abs_data A dataframe containing the absorbance data.
-#' @param doc_norm Either TRUE, FALSE or "both" indicating if peaks should be normalized by DOC concentrations.
-#' @param meta The metadata associated with the samples.
-#' @param path Location to save the exported absorbance and fluorescence metrics.
+#' @importFrom openxlsx createWorkbook addWorksheet writeData saveWorkbook
+#'
+#' @param eem_list an object of class eem or eemlist
+#' @param abs_data a dataframe containing the absorbance data
+#' @param meta the metadata associated with the samples
+#' @param prjpath location to save the exported absorbance and fluorescence metrics
+#' @param doc_norm either TRUE, FALSE or "both" indicating if peaks should be normalized by DOC concentrations
+#' @param sampsascol a logical indicating how results should be oriented, TRUE puts samples as columns, FALSE puts samples as rows
+#' @param waves optional, a vector of wavelengths in nm to extract from the absorbance data
+#' @export
 
-get_indices <- function(eem_list, abs_data, , meta=meta,
-                        path){
+get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", sampsascol=F, waves=NULL){
   .OSU_excel <- function(file, sheet_name, df){
     wb <- openxlsx::loadWorkbook(file)
     openxlsx::addWorksheet(wb, sheet_name)
@@ -381,57 +411,99 @@ get_indices <- function(eem_list, abs_data, , meta=meta,
     openxlsx::saveWorkbook(wb,file,overwrite = TRUE)
   }
 
-  #copy peak file into folder
-  file.copy(from="T:/LabMembers/10_Katie/11_Aqualog Processing/Peak_ReadMe.xlsx", to=paste(demopath, "/5_Processed/SpectralIndices.xlsx", sep=""), overwrite = T)
-  wb_name <- paste(demopath, "/5_Processed/SpectralIndices.xlsx", sep="")
-  #get flourescence data
-  if(DOC_norm_index == T | DOC_norm_index == "both"){
-    coble <- eem_coble_peaks2(eem_list_doc, verbose = F)
-    if(sampsascol == T){coble <- clean_transpose(coble)}
-    .OSU_excel(wb_name, "EEM_Indices_DOC", coble)
+  stopifnot(.is_eem(eem_list) | .is_eemlist(eem_list) | is.data.frame(c(abs_data, meta))|
+              is.character(prjpath) | is.logical(sampsascol) | file.exists(prjpath))
+
+  #information to put with peaks
+  documentation <- data.frame(c("Peaks extracted using fewsdom package in R.",
+  "For peak definitions see 'eem_coble_peaks2' and 'abs_parm' functions in the fewsdom package.",
+  "The package can be downloaded from https://github.com/katiewampler/fewsdom"))
+
+  #saving location
+  if(file.exists(paste(prjpath,  "/5_Processed", sep=""))==F){
+    stop("Invalid file structure, please use 'create_files' function to create file for plots within file directory")
   }
-  if(DOC_norm_index == F | DOC_norm_index == "both"){
-    coble <- eem_coble_peaks2(eem_list, verbose = F)
+
+  wb_name <- paste(prjpath, "/5_Processed/SpectralIndices.xlsx", sep="")
+
+  #add documentation info
+  wb <- openxlsx::createWorkbook(wb_name)
+  openxlsx::addWorksheet(wb, "README")
+  openxlsx::writeData(wb,"README", documentation, colNames = F)
+  openxlsx::saveWorkbook(wb,wb_name,overwrite = TRUE)
+
+  #get flourescence data
+  if(doc_norm == T | doc_norm == "both"){
+    eem_doc <- .eem_doc_norm(eem_list, meta)
+    if(length(eem_doc) >0){
+      coble <- eem_coble_peaks2(eem_doc, abs_data = abs_data, verbose = F)
+      if(sampsascol == T){coble <- clean_transpose(coble)}
+      .OSU_excel(wb_name, "fluor_indices_DOC", coble)
+    } else{
+      warning("No DOC data was provided, DOC normalized fluorescence metrics were not calculated")
+    }
+
+  }
+  if(doc_norm == F | doc_norm == "both"){
+    eem_list <- .eem_doc_rm(eem_list, meta) #remove any normalization done
+    coble <- eem_coble_peaks2(eem_list, abs_data=abs_data, verbose = F)
     if(sampsascol == T){coble <- clean_transpose(coble)}
-    .OSU_excel(wb_name, "EEM_Indices", coble)
+    .OSU_excel(wb_name, "fluor_indices", coble)
   }
 
   #get absorbance data
-  abs_wave <- c(250,254, 281,350,365,412,440, 465, 665)
+    abs_df <- abs_parm(abs_data, meta=meta,
+                       r_thresh=0.8, keep_all=F, waves=waves)
 
-  if(DOC_norm_index == T | DOC_norm_index == "both"){
-    abs_df <- abs_parm(abs_data_doc, waves=abs_wave)
     if(sampsascol == T){abs_df <- clean_transpose(abs_df)}
-    .OSU_excel(wb_name, "Abs_Indices_DOC", abs_df)
-
-  }else if(DOC_norm_index == T){
-    message("Error: Attempt to use DOC normalized data with missing DOC values")
-  } else if(DOC_norm_index == "both"){
-    message("Warning: Attempt to use DOC normalized data with missing DOC values, only unnormalized data will be reported")
-
-  }
-
-  #get other absorbance data
-  if(DOC_norm_index == F | DOC_norm_index == "both"){
-    abs_df <- abs_parm(abs_data, waves=abs_wave)
-    if(sampsascol == T){abs_df <- clean_transpose(abs_df)}
-
-    #if there's DOC, put in table and get SUVA 254
-    if(sum(!is.na(meta$DOC_mg_L)) > 0){
-      abs_df$DOC <- NA
-      for(x in 1:nrow(abs_df)){
-        val <- match(abs_df$sample[x], meta$unique_ID)
-        abs_df$DOC[x] <- meta$DOC_mg_L[val]
-      }
-      abs_df$SUVA254 <- abs_df$a254/abs_df$DOC * 100
-    }  else{
-      abs_df$DOC <- NA
-      abs_df$SUVA254 <- NA
-    }
-    .OSU_excel(wb_name, "Abs_Indices", abs_df)
-
-  }
+    if(nrow(abs_df) > 0){
+      .OSU_excel(wb_name, "abs_indices", abs_df)
+    }else{warning("No DOC data was provided, absorbance metrics were not calculated")}
 
   cat("Spectral Indices have been saved")
 }
 
+#' Exclude complete wavelengths or samples form data set
+#'
+#' Outliers in all modes should be avoided. With this functions excitation or
+#' emission wavelengths as well as samples can be removed completely from your
+#' sample set. Take directly from staRdom package to prevent orphaned package
+#' errors
+#'
+#' @importFrom eemR eem_extract
+#' @param eem_list object of class eemlist
+#' @param exclude list of three vectors, see details
+#' @param verbose stats whether additional information is given in the command line
+#'
+#' The argument exclude is a named list of three vectors.
+#' The names must be "ex", "em" and "sample". Each element contains a vector of
+#' wavelengths or sample names that are to be excluded from the data set.
+#'
+#' @returns object of class eemlist
+#' @noRd
+
+eem_exclude <- function (eem_list, exclude = list, verbose = FALSE)
+{
+  ex_exclude <- exclude[["ex"]]
+  em_exclude <- exclude[["em"]]
+  sample_exclude <- exclude[["sample"]]
+  if (!is.null(sample_exclude)) {
+    sample_exclude <- paste0("^", sample_exclude, "$")
+    eem_list <- eemR::eem_extract(eem_list, sample_exclude, verbose = verbose)
+  }
+  eem_list <- lapply(eem_list, function(eem) {
+    eem$x <- eem$x[!eem$em %in% em_exclude, !eem$ex %in%
+                     ex_exclude]
+    eem$ex <- eem$ex[!eem$ex %in% ex_exclude]
+    eem$em <- eem$em[!eem$em %in% em_exclude]
+    eem
+  })
+  if (!is.null(ex_exclude) & verbose)
+    cat(paste0("Removed excitation wavelength(s): ", paste0(ex_exclude %>%
+                                                              sort(), collapse = ", ")), fill = TRUE)
+  if (!is.null(em_exclude) & verbose)
+    cat(paste0("Removed emission wavelength(s): ", paste0(em_exclude %>%
+                                                            sort(), collapse = ", ")), fill = TRUE)
+  class(eem_list) <- "eemlist"
+  eem_list
+}
