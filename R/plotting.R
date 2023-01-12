@@ -8,9 +8,10 @@
 #' @importFrom pals parula ocean.haline cubicl kovesi.rainbow
 #' @importFrom plyr round_any
 #' @importFrom grDevices colorRampPalette
+#' @importFrom gridExtra grid.arrange
 #' @import ggplot2
 #'
-#' @param eem An object of class eem, the data you want to plot.
+#' @param eem An object of class eem or eemlist, the data you want to plot.
 #' @param manualscale A TRUE or FALSE indicating if you want to specify the minimum and maximum of the intensity scale manually, good for comparisons across samples.
 #' @param manualmax Maximum value for intensity scale.
 #' @param manualmin Minimum value used for intensity scale.
@@ -19,11 +20,20 @@
 #' @param prec An integer for the number of significant figures used for binning the intensity.
 #' @param palette A character with the color palette to use. Currently 'parula', 'ocean.haline', 'cubicl', and 'kovesi.rainbow' from the 'pals' package are supported.
 #' @param z_unit either "RU" or "DOC", use "RU" for raman normalized data and "DOC" for raman and DOC normalized data
+#' @returns If class is eem, will return a single plot, if class is an eemlist will return a list of plots
 #' @export
 
 ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
                       nbins = 8, label_peaks=F, prec=2, palette="parula",
                    z_unit="RU"){
+  if (.is_eemlist(eem)) {
+    res <- lapply(eem, ggeem2, manualscale=manualscale,
+                  manualmax=manualmax, manualmin=manualmin,
+                  nbins =nbins, label_peaks=label_peaks,
+                  prec=prec, palette=palette,
+                  z_unit=z_unit)
+    return(res)
+  }
   .ceiling_dec <- function(x, level=-.place_val(x)) round(x + 5.0001*10^(-level-1), level) #ceiling function with decimal
   .ceiling_int <- function(x, level=.place_val(x), precision) signif(x + 5*10^(level-precision-1), precision) #ceiling function with signif for vals above 1
   .place_val <- function(x) {
@@ -167,7 +177,7 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
       ggplot2::annotate("rect", xmin=270, xmax = 280, ymin = 320, ymax=350, color="black", fill=NA)
 
   }
-  plot
+  return(plot)
 }
 
 
@@ -182,18 +192,56 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
 #' @param eem object of class eemlist with EEMs to be plotted
 #' @param sing_plot logical, if TRUE will create and save a separate plot for each EEMs
 #' @param sum_plot logical, if TRUE will create and save a plot with all the EEMs in a single plot
-#' @param doc_norm either TRUE, FALSE, or "both". TRUE or "both" will return EEMs normalized by DOC concentration
-#' @param title either a vector the same length as the number of EEMs with titles, or "description" or "sampleID"
+#' @param doc_norm either TRUE, FALSE. TRUE return EEMs normalized by DOC concentration
+#' @param title either a dataframe with samples and titles, 'description', 'sampleID', or FALSE (see details)
+#' @param ncol number of columns used in summary plot with all the EEMs samples
+#' @param save_names optional, a character that will be added to the unique ID for plot file names.
 #' @param ... arguments to pass to 'ggeems2' function
+#' @details For title argument, you can specify the title manually, by using a dataframe where the
+#' first column in the unique ID's for the samples and the second column is the title. If 'description'
+#' is chosen it will use the description column of the metadata. If 'sampleID' is chosen it will
+#' use the unique identifier column from the metadata. Lastly if FALSE is chosen no titles will be added.
 #' @export
 #'
 
 plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
-                      title="description", ...){
+                      ncol=4, title="description", save_names = "", ...){
+  .add_title <- function(eem, title, meta){
+    order <- eem_names(eem)
+    if(is.data.frame(title)==T){
+      index <- sapply(order, function(x) which(x == title[,1]))
+      plot_title <- title[index,2]
+    }else if(title =="sampleID"){
+      index <- sapply(order, function(x) which(x == meta$unique_ID))
+      plot_title <- meta$data_identifier[index]
+    }else if(title == "description"){
+      index <- sapply(order, function(x) which(x == meta$unique_ID))
+      plot_title <- meta$description[index]
+    }else{plot_title <- NULL}
+    return(plot_title)
+  }
+  .save_plots <- function(n, title){
+    pl <- raw_plots[[n]]
+    name <- eem_names(eem)[n]
+    png(paste0(save_spot, "/", name, save_names, ".png",sep=""),width=20, height = 15, units = 'cm', res = 300)
+    if(title != F){
+      pl_title <- .add_title(eem[[n]], title, meta)
+      pl <- pl + labs(title=pl_title) + theme(plot.title = element_text(size=10))
+    }
+    suppressWarnings(print(pl))
+    dev.off()
+  }
+  .title_plots <- function(n, title){
+    pl <- raw_plots[[n]]
+    if(title != F){
+      pl_title <- .add_title(eem[[n]], title, meta)
+      pl <- pl + labs(title=pl_title) + theme(plot.title = element_text(size=10))
+    }
+  }
+
   #check inputs
   stopifnot(.is_eemlist(eem) | file.exists(prjpath) | is.data.frame(meta) |
-            is.logical(sing_plot) | is.logical(sum_plot) |
-            is.vector(title) | doc_norm %in% c(TRUE, FALSE, "both"))
+            is.logical(sing_plot) | is.logical(sum_plot) | doc_norm %in% c(TRUE, FALSE, "both"))
 
   #create spot to put data
   if(file.exists(paste(prjpath,  "/5_Processed/Figures", sep=""))==F){
@@ -201,123 +249,66 @@ plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
   }
   save_spot <- paste(prjpath,  "/5_Processed/Figures", sep="")
 
-  #if there's no DOC data, don't run DOC metrics/plots even if asked
+  #if there's no DOC data in metadata, don't run DOC metrics/plots even if asked
   if(sum(is.na(meta$DOC_mg_L)) == nrow(meta)){
     doc_norm <- F
     warning("Metadata didn't contain any DOC data, unable to create DOC normalized plots.")}
 
   #account for doc normalization
   if(doc_norm ==T){
-    ### stopped here ### now eems are marked with doc normalized, but need to figure out plotting
-    #don't normalize again if already normalized, but do normalize if they haven't been
-    if(doc_norm == T){
-      #remove EEMs with no DOC data (or value of 0)
-      EEM_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
-      X_DOC <- eem_exclude(X_DOC,
-                           exclude=list("ex"=c(), "em"=c(),"sample"= EEM_rm ))
+    #remove EEMs with no DOC data (or value of 0)
+    EEM_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
+    eem <- eem_exclude(eem,
+                         exclude=list("ex"=c(), "em"=c(),"sample"= EEM_rm ))
 
-      #remove absorbance with no DOC data (or value of 0)
-      abs_rm <- which((colnames(Sabs_DOC) %in% EEM_rm) == T)
-      if(length(abs_rm) > 0){
-        Sabs_DOC <-  Sabs_DOC[,-(abs_rm)]
-      }
+    #check if they've been normalized
+    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+    to_norm <- which(doc_done == F)
 
-      #EEMs
-      for (x in 1:length(X_DOC)){
-        eem_name <- X_DOC[[x]]$sample
-        eem_index <- which(eem_name == meta$unique_ID)
-        X_DOC[[x]]$x <- X_DOC[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
-      }
-
-      #Absorbance
-      for(x in colnames(Sabs_DOC)[2:ncol(Sabs_DOC)]){
-        col_num <- which(x == colnames(Sabs_DOC))
-        abs_index <- which(x == meta$unique_ID)
-        doc <- as.numeric(meta$DOC_mg_L[abs_index])
-        Sabs_DOC[,col_num] <- Sabs_DOC[,col_num] / doc}
-      write.table(paste(Sys.time(), "- Absorbance and EEM's were normalized by DOC concentration", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
-
+    #normalize those that haven't
+    for(x in to_norm){
+      eem_name <- eem[[x]]$sample
+      eem_index <- which(eem_name == meta$unique_ID)
+      eem[[x]]$x <- eem[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
+      attr(eem[[x]], "is_doc_normalized") <- TRUE
     }
 
-    sing_plots_DOC <- lapply(X_DOC_clip, ggeem2, include_peaks=T)
-    write.table(paste(Sys.time(), "- Plots normalized to DOC concentrations were created", sep=""), process_file, append=T, quote=F, row.names = F, col.names = F)}
+    #double check all are normalized
+    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+    stopifnot(sum(doc_done==F)==0)
+    }
 
-  sing_plots <- lapply(X_clip, ggeem2, include_peaks=T)
-  write.table(paste(Sys.time(), "- Plots NOT normalized to DOC concentrations were created", sep=""), process_file, append=T, quote=F, row.names = F, col.names = F)
+  #remove doc normalization if doc_norm is false but sample are doc_normalized
+  if(doc_norm ==F){
+    #check if they've been normalized
+    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+    to_unnorm <- which(doc_done == T)
+
+    #normalize those that haven't
+    for(x in to_unnorm){
+      eem_name <- eem[[x]]$sample
+      eem_index <- which(eem_name == meta$unique_ID)
+      eem[[x]]$x <- eem[[x]]$x  * as.numeric(meta$DOC_mg_L[eem_index])
+      attr(eem[[x]], "is_doc_normalized") <- FALSE
+    }
+
+    #double check all are normalized
+    doc_done <- sapply(eem, function(x) attr(x, "is_doc_normalized"))
+    stopifnot(sum(doc_done==T)==0)
+  }
+
+  z_unit <- ifelse(doc_norm ==T, "DOC", "RU")
+  raw_plots <- ggeem2(eem, z_unit=z_unit, ...)
+
 
   # PNGs of plots are written to output directory
-  if(individual == T){
-    for(n in 1:length(sing_plots)){
-      pl <- sing_plots[[n]]
-      name <- eem_names(X_clip)[n]
-      title <- meta$description[n]
-      png(paste0(name,'.png',sep=""),width=20, height = 15, units = 'cm', res = 300)
-      plotp <- pl
-      if(plottitle == T){
-        plotp <- plotp + labs(title=title) + theme(plot.title = element_text(size=8))
-      }
-      suppressWarnings(print(plotp))
-      dev.off()
-    }
+  if(sing_plot == T){sapply(1:length(raw_plots), .save_plots, title=title)}
+  if(sum_plot == T){
+    sum_pl <- lapply(1:length(raw_plots), .title_plots, title=title)
 
-    if(DOC_norm_plot == T & DOC_norm ==T){
-      for(n in 1:length(sing_plots_DOC)){
-        pl <- sing_plots_DOC[[n]]
-        name <- eem_names(X_DOC_clip)[n]
-        title <- meta$description[which(meta$unique_ID== name)]
-        png(paste0("DOC_", name,'.png',sep=""),width=20, height = 15, units = 'cm', res = 300)
-        plotp <- pl
-        if(plottitle == T){
-          plotp <- plotp + labs(title=title) + theme(plot.title = element_text(size=8))
-        }
-        suppressWarnings(print(plotp))
-        dev.off()
-      }
-    }
+    width <- ncol * 20
+    height <- ceiling(length(sum_pl)/ncol) * 15
+    png(paste(save_spot, "/EEM_summary_plot", save_names, ".png", sep=""),width=width, height = height, units = 'cm', res = 300)
+    suppressWarnings(gridExtra::grid.arrange(grobs = sum_pl, ncol=ncol))
+    dev.off()}
   }
-
-  if(overall == T){
-    overall_plots <- sing_plots
-    if(plottitle == T){
-      for(n in 1:length(overall_plots)){
-        plotp <- overall_plots[[n]]
-        name <- meta$data_identifier[n]
-        title <- meta$description[n]
-        if(overall_title =="description"){
-          plotp <- plotp + labs(title=title) + theme(plot.title = element_text(size=9))
-        }else if(overall_title == "sampleID"){
-          plotp <- plotp + labs(title=name) + theme(plot.title = element_text(size=14))
-        }
-        overall_plots[[n]] <- plotp
-      }}
-    width <- overall_ncol * 20
-    height <- ceiling(length(overall_plots)/overall_ncol) * 15
-    png("EEM_summary_plot.png",width=width, height = height, units = 'cm', res = 300)
-    suppressWarnings(grid.arrange(grobs = overall_plots, ncol=overall_ncol))
-    dev.off()
-
-    #get DOC summary
-    if(DOC_norm_plot == T & DOC_norm ==T){
-      overall_plots <- sing_plots_DOC
-      if(plottitle == T){
-        for(n in 1:length(overall_plots)){
-          plotp <- overall_plots[[n]]
-          name <- eem_names(X_DOC_clip)[n]
-          title <- meta$description[which(meta$unique_ID==name)]
-          if(overall_title =="description"){
-            plotp <- plotp + labs(title=title) + theme(plot.title = element_text(size=9))
-          }else if(overall_title == "sampleID"){
-            plotp <- plotp + labs(title=name) + theme(plot.title = element_text(size=14))
-          }
-          overall_plots[[n]] <- plotp
-        }}
-      width <- overall_ncol * 20
-      height <- ceiling(length(overall_plots)/overall_ncol) * 15
-      png("EEM_summary_plot_DOC.png",width=width, height = height, units = 'cm', res = 300)
-      suppressWarnings(grid.arrange(grobs = overall_plots, ncol=overall_ncol))
-      dev.off()
-    }
-
-  }
-
-}
