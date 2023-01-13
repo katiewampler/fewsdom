@@ -6,7 +6,7 @@
 \usage{
 raman(
   eem,
-  raman_mask = c(10, 10, 1.5, 1.5),
+  raman_mask = c(8, 8, 1.5, 1.5),
   width_method = "auto",
   raman_interp = c(T, T),
   process_file = NULL,

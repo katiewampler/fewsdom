@@ -108,8 +108,8 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
     warning("Cannot use the auto cutting method for second order raman line, providing estimate.")
 
   }else if(type == "raman" & order == 1){
-    row_start <- 26
-    row_end <- 32
+    row_start <- 24
+    row_end <- 31
     thresh <- 5
     up_cor <- 0
   }else if(type == "rayleigh" & order == 1){
@@ -120,7 +120,7 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
   }else if(type == "rayleigh" & order == 2){
     row_start <- 130
     row_end <- 145
-    up_cor <- 0
+    up_cor <- 5
     thresh <- 5 #smaller threshold for this one because it's right in area of interest
   }else{
     stop("Please choose either rayleigh or raman and orders 1 or 2.")
@@ -137,6 +137,9 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
     #ggplot(df, aes(x=em, y=int)) + geom_line()
     peaks <- as.data.frame(pracma::findpeaks(df$int, sortstr=T, minpeakheight = 100))
     peaks <- peaks[peaks$V2 > row_start & peaks$V2 < row_end,]
+
+    #df$row <- row.names(df)
+    #ggplot() + geom_line(df, mapping=aes(x=as.numeric(row), y=int)) + geom_vline(peaks,xintercept = peaks$V2)
 
     if(nrow(peaks) == 0){
       up_width <- NA
@@ -192,11 +195,11 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
       }
     }
 
-    df <- data.frame(eem_num = n, up_width=up_width, down_width=down_width)
+    data <- data.frame(eem_num = n, up_width=up_width, down_width=down_width)
 
     if(n == 1){
-      df_test <- df
-    }else{df_test <- rbind(df_test, df)}
+      df_test <- data
+    }else{df_test <- rbind(df_test, data)}
   }
   up_width <- median(df_test$up_width, na.rm=T)
   down_width <- median(df_test$down_width, na.rm=T)
@@ -278,7 +281,7 @@ rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), width_method="auto", ray
 #' @param verbose a logical, if TRUE will print out widths used to mask via the auto width method
 #' @export
 
-raman <- function(eem, raman_mask=c(10,10,1.5,1.5), width_method="auto", raman_interp=c(T,T),
+raman <- function(eem, raman_mask=c(8,8,1.5,1.5), width_method="auto", raman_interp=c(T,T),
                   process_file=NULL, verbose=F){
   #function checks
   stopifnot(.is_eemlist(eem) | is.numeric(raman_mask)|length(raman_mask)==4|
@@ -287,7 +290,9 @@ raman <- function(eem, raman_mask=c(10,10,1.5,1.5), width_method="auto", raman_i
 
   if(width_method == "auto"){
     ram1 <- find_cut_width(eem, type="raman", order=1)
+    ram1[is.na(ram1)] <- raman_mask[which(is.na(ram1)== T)] #replaces with default if NA
     raman_mask <- c(ram1, raman_mask[3:4])
+
     if(verbose ==T){
       cat(raman_mask)
     }

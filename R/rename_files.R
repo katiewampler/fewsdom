@@ -104,7 +104,6 @@ files_rename <- function(meta, prjpath){
 #' file type in the main file directory.
 #'
 #' @importFrom utils zip
-#' @importFrom readxl read_xlsx
 #' @importFrom stringr str_detect
 #'
 #' @param prjpath the file path of the main file directory where data is located
@@ -120,7 +119,7 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T){
 
   #Load Sample Log
   if(stringr::str_detect(meta_file, ".xlsx")){
-    meta <- readxl::read_xlsx(meta_file, sheet = meta_sheet)
+    meta <- openxlsx::readWorkbook(meta_file, sheet=meta_sheet, detectDates = T)
   } else{
     meta <- read.csv(meta_file)
   }
@@ -128,6 +127,14 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T){
   #check metadata
   stopifnot(sum(is.na(meta$RSU_area_1s)) == 0 | "data_identifier" %in% colnames(meta),
             "replicate_no" %in% colnames(meta), "integration_time_s" %in% colnames(meta))
+
+  #check for duplicates that aren't marked as such
+  meta_dup <- meta %>% group_by(data_identifier) %>% summarise(count=n())
+  dups <- meta_dup$data_identifier[meta_dup$count > 1]
+  for(x in dups){
+    ndups <- meta_dup$count[meta_dup$data_identifier == x]
+    meta$replicate_no[meta$data_identifier == x] <- 1:ndups
+  }
 
   #get unique ID
   meta$unique_ID <- paste(meta$data_identifier, "_", meta$replicate_no, "_", meta$integration_time_s, "s", sep="")

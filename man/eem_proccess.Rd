@@ -52,7 +52,7 @@ eem_proccess(
 
 \item{em_clip}{vector of length two with the emission wavelengths to clip the EEMs to}
 
-\item{doc_norm}{logical, if TRUE will normalize EEMs to 1 mg/L carbon, will remove any samples without DOC concentrations in the metadata}
+\item{doc_norm}{logical, if TRUE will normalize any EEMs with DOC data to 1 mg/L carbon}
 
 \item{...}{arguments passed on to scattering functions 'raman' and 'rayleigh'}
 }

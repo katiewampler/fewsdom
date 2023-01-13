@@ -1,6 +1,6 @@
 utils::globalVariables(c("%dopar%","i", ".",
                          "...","wavelength", "em", "z", "ex",
-                         "x","y"))
+                         "x","y", "data_identifier"))
 
 
 #' Create file structure
@@ -94,4 +94,19 @@ create_files <- function(prjpath){
   return(eem)
 }
 
-
+#' Save files to excel
+#'
+#' Saves files to excel based on named sheet name
+#'
+#' @param file name of excel file
+#' @param sheet_name sheet name of excel file
+#' @param df dataframe to save to excel file
+#' @param sampsascol a logical indicating how results should be oriented, TRUE puts samples as columns, FALSE puts samples as rows
+#' @noRd
+#'
+.OSU_excel <- function(file, sheet_name, df, sampsascol){
+  wb <- openxlsx::loadWorkbook(file)
+  openxlsx::addWorksheet(wb, sheet_name)
+  openxlsx::writeData(wb,sheet_name, df, rowNames = sampsascol)
+  openxlsx::saveWorkbook(wb,file,overwrite = TRUE)
+}

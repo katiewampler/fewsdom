@@ -20,7 +20,7 @@
 #' @param dilute logical, if TRUE will correct for dilution factors given in metadata table
 #' @param ex_clip vector of length two with the excitation wavelengths to clip the EEMs to
 #' @param em_clip vector of length two with the emission wavelengths to clip the EEMs to
-#' @param doc_norm logical, if TRUE will normalize EEMs to 1 mg/L carbon, will remove any samples without DOC concentrations in the metadata
+#' @param doc_norm logical, if TRUE will normalize any EEMs with DOC data to 1 mg/L carbon
 #' @param ... arguments passed on to scattering functions 'raman' and 'rayleigh'
 #' @return an list where the first object is of class eemlist with processed EEMs samples. The
 #' second object is a dataframe with the processes absorbance data.
@@ -142,48 +142,34 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
 
   #normalize for DOC
   X_DOC <- X_dil_cor
-  Sabs_DOC <- Sabs_dil_cor
   if(doc_norm == T){
-    #remove EEMs with no DOC data (or value of 0)
-    EEM_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
-    X_DOC <- eem_exclude(X_DOC,
-                         exclude=list("ex"=c(), "em"=c(),"sample"= EEM_rm ))
+    #note eems with no DOC or value of 0
+    eem_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
+    eem_w_doc <- which(!(eem_names(X_DOC) %in% eem_rm))
 
-    #remove absorbance with no DOC data (or value of 0)
-    abs_rm <- which((colnames(Sabs_DOC) %in% EEM_rm) == T)
-    if(length(abs_rm) > 0){
-      Sabs_DOC <-  Sabs_DOC[,-(abs_rm)]
-    }
-
-    #EEMs
+    #EEMs, will only correct those with DOC, only marks those corrected to keep track
     X_DOC <- lapply(1:length(X_DOC), function(x){
-      eem_name <- X_DOC[[x]]$sample
-      eem_index <- which(eem_name == meta$unique_ID)
-      X_DOC[[x]]$x <- X_DOC[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
-      attr(X_DOC[[x]], "is_doc_normalized") <- TRUE
+      if(x %in% eem_w_doc){
+        eem_name <- X_DOC[[x]]$sample
+        eem_index <- which(eem_name == meta$unique_ID)
+        X_DOC[[x]]$x <- X_DOC[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
+        attr(X_DOC[[x]], "is_doc_normalized") <- TRUE
+      }
       return(X_DOC[[x]])
     })
     class(X_DOC) <- "eemlist"
 
-    #Absorbance
-    for(x in colnames(Sabs_DOC)[2:ncol(Sabs_DOC)]){
-      col_num <- which(x == colnames(Sabs_DOC))
-      abs_index <- which(x == meta$unique_ID)
-      doc <- as.numeric(meta$DOC_mg_L[abs_index])
-      Sabs_DOC[,col_num] <- Sabs_DOC[,col_num] / doc}
-    attr(Sabs_DOC, "is_doc_normalized") <- TRUE
-    write.table(paste(Sys.time(), "- Absorbance and EEM's were normalized by DOC concentration", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
-
+   write.table(paste(Sys.time(), "- EEM's were normalized by DOC concentration", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
   }
 
   #clip DOC normalized EEM's
-  X_DOC_clip <- X_DOC
+  X_DOC_clip <- X_dil_cor
   X_DOC_clip<- eemR::eem_cut(X_DOC_clip, ex=c(min(X_DOC_clip[[1]]$ex):ex_clip[1], ex_clip[2]:max(X_DOC_clip[[1]]$ex),exact=F ))
   X_DOC_clip <- eemR::eem_cut(X_DOC_clip, em=c(min(X_DOC_clip[[1]]$em):em_clip[1], em_clip[2]:max(X_DOC_clip[[1]]$em),exact=F ))
   write.table(paste(Sys.time(), "- DOC Normalized EEM's were clipped to Excitation:",ex_clip[1]," to ", ex_clip[2],
                     " nm and Emission:",em_clip[1]," to ", em_clip[2], " nm", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
 
- return(list(X_DOC_clip, Sabs_DOC))
+ return(list(X_DOC_clip, Sabs_dil_cor))
 }
 
 #' Modifying fluorescence data according to dilution.

@@ -11,7 +11,6 @@ Encoding: UTF-8
 LazyData: true
 Imports:
 	stringr (>= 1.4.0),
-	readxl (>= 1.4.0), 
 	dplyr (>= 1.0.9),
 	pals (>= 1.7),
 	pracma (>= 2.3.8),

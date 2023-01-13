@@ -13,7 +13,7 @@ get_doc(
   doc_delim = "-",
   meta_file,
   meta_sheet = NULL,
-  meta_delim,
+  site_loc = c(1, 7),
   rewrite = T
 )
 }
@@ -34,9 +34,9 @@ get_doc(
 
 \item{meta_sheet}{a string of the metadata sheet name, only required if the metadata file is an .xlsx file}
 
-\item{meta_delim}{a string indicating the separate between site name and other identifiers in the metadata data identifier}
+\item{site_loc}{a vector indicating the start and end of the site name in the metadata data identifier}
 
-\item{rewrite}{A logical, if TRUE original metadata will be saved over with metadata with DOC results, if FALSE it will add "_doc_added" to the end of the table}
+\item{rewrite}{a logical, if TRUE original metadata will be saved over with metadata with DOC results, if FALSE it will add "_doc_added" to the end of the table}
 }
 \description{
 Takes data from a separate table of DOC results and puts

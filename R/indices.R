@@ -404,12 +404,6 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
 #' @export
 
 get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", sampsascol=F, waves=NULL){
-  .OSU_excel <- function(file, sheet_name, df){
-    wb <- openxlsx::loadWorkbook(file)
-    openxlsx::addWorksheet(wb, sheet_name)
-    openxlsx::writeData(wb,sheet_name, df, rowNames = sampsascol)
-    openxlsx::saveWorkbook(wb,file,overwrite = TRUE)
-  }
 
   stopifnot(.is_eem(eem_list) | .is_eemlist(eem_list) | is.data.frame(c(abs_data, meta))|
               is.character(prjpath) | is.logical(sampsascol) | file.exists(prjpath))
@@ -438,7 +432,7 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
     if(length(eem_doc) >0){
       coble <- eem_coble_peaks2(eem_doc, abs_data = abs_data, verbose = F)
       if(sampsascol == T){coble <- clean_transpose(coble)}
-      .OSU_excel(wb_name, "fluor_indices_DOC", coble)
+      .OSU_excel(wb_name, "fluor_indices_DOC", coble, sampsascol)
     } else{
       warning("No DOC data was provided, DOC normalized fluorescence metrics were not calculated")
     }
@@ -448,7 +442,7 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
     eem_list <- .eem_doc_rm(eem_list, meta) #remove any normalization done
     coble <- eem_coble_peaks2(eem_list, abs_data=abs_data, verbose = F)
     if(sampsascol == T){coble <- clean_transpose(coble)}
-    .OSU_excel(wb_name, "fluor_indices", coble)
+    .OSU_excel(wb_name, "fluor_indices", coble, sampsascol)
   }
 
   #get absorbance data
@@ -457,7 +451,7 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
 
     if(sampsascol == T){abs_df <- clean_transpose(abs_df)}
     if(nrow(abs_df) > 0){
-      .OSU_excel(wb_name, "abs_indices", abs_df)
+      .OSU_excel(wb_name, "abs_indices", abs_df, sampsascol)
     }else{warning("No DOC data was provided, absorbance metrics were not calculated")}
 
   cat("Spectral Indices have been saved")
