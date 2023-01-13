@@ -4,32 +4,33 @@ author: "Katie Wampler"
 date: "2022-12-24"
 output: pdf_document
 ---
+Formatting rules 
+-doc should be lowercase in functions, capital in documentation 
+-eem should be lowercase in functions, EEMs in documentation 
+-parameters should start with lowercase, no periods at end 
+-function descriptions should be in sentence case 
+-descriptions should have sentence structure and periods
+-arguments should be in same order as documentation and function
+-functions in documentation should be in single quotes
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-STOPPING POINT, work on turning sections of code into functions.
+to do:: save eems data as r object and .csv 
 
-start with doc matching function I started but got stuck
-
-check warning messages on rayleigh function --> when widths overlap and it tries to deal with NA (not sure how to fix but can ignore for now) [quieted, but should ideally figure out how to fix error without just quieting it]
-
-function to set up file structure??
 
 ```
 
 
 ## THINGS TO DO 
 
-1. Figure out how to save data file for doc function 
-2. Add run type into metadata table 
-3. Ensure sampleQ/manual have consistent capitalization
+4. clean up documentation, similar arguments 
+6. add examples to functions
 
 
 #Work Flow 
-1. Finish converting functions written in code to functions in package
-2. Make sure updated functions are correct in the code (mostly done minus indicies functions)
-3. Make sure code runs 
+
 4. Work towards making sections of the script into functions 
 5. Make a very simple script that does everything. Write to loop through files so you can easily process everything the same way. 
 6. Create functions for combining individual files
