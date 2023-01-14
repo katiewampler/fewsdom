@@ -81,7 +81,8 @@ get_doc <- function(doc_file, doc_sheet=NULL, doc_column, name_column, nskip=0, 
       new_meta_file <- paste(unlist(str_split(meta_file, ".csv"))[1], "_doc_added.csv", sep="")
        write.csv(meta, new_meta_file, col.names = T, row.names = F, quote=F)}
     }
-    cat(paste("Linked ", sum(!is.na(meta$DOC_mg_L)), "/", nrow(meta), " samples with DOC data", sep=""), sep="/n")
+    cat(paste("Linked ", sum(!is.na(meta$DOC_mg_L)), "/", nrow(meta), " samples with DOC data", sep=""))
+    cat("\n")
 
     return(meta)
 }

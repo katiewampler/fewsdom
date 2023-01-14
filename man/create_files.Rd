@@ -10,6 +10,6 @@ create_files(prjpath)
 \item{prjpath}{a string indicating the project file with the data}
 }
 \description{
-Takes a file with EEM's and absorbance data and creates subfolders to store
+Takes a file with EEMs and absorbance data and creates subfolders to store
 raw and processed data, plots, and output tables
 }

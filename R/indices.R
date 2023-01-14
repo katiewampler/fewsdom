@@ -418,7 +418,9 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
     stop("Invalid file structure, please use 'create_files' function to create file for plots within file directory")
   }
 
-  wb_name <- paste(prjpath, "/5_Processed/SpectralIndices.xlsx", sep="")
+  file_date <- unlist(strsplit(prjpath, "/"))
+  file_date <-file_date[length(file_date)]
+  wb_name <- paste(prjpath, "/5_Processed/SpectralIndices_", file_date,".xlsx", sep="")
 
   #add documentation info
   wb <- openxlsx::createWorkbook(wb_name)
@@ -455,6 +457,7 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
     }else{warning("No DOC data was provided, absorbance metrics were not calculated")}
 
   cat("Spectral Indices have been saved")
+  cat("\n")
 }
 
 #' Exclude complete wavelengths or samples form data set

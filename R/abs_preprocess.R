@@ -59,6 +59,5 @@ abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
       colnames(df) <- c("Wavelength", "Abs")
       write.table(df, paste(prjpath, "/4_Clean_Absorbance/", x, ".csv", sep=""), row.names = F, col.names = F, quote = F, sep=",")
     }
-    print("absorbance data cleaned and saved as .csv's")
   }
 }

@@ -17,25 +17,15 @@ Formatting rules
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-to do:: save eems data as r object and .csv 
-
-
 ```
 
 
 ## THINGS TO DO 
-
-4. clean up documentation, similar arguments 
-6. add examples to functions
-
-
-#Work Flow 
-
-4. Work towards making sections of the script into functions 
-5. Make a very simple script that does everything. Write to loop through files so you can easily process everything the same way. 
-6. Create functions for combining individual files
-7. Export package for use on github 
-8. Start on personal package with things I use a lot.  
+-compare both width methods
+-add examples to functions
+-Write to loop through files so you can easily process everything the same way. 
+-Create functions for combining individual files
+-Start on personal package with things I use a lot.  
 
 
 ## CODE THAT I DON'T WANT TO DUMP YET 

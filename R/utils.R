@@ -5,7 +5,7 @@ utils::globalVariables(c("%dopar%","i", ".",
 
 #' Create file structure
 #'
-#' Takes a file with EEM's and absorbance data and creates subfolders to store
+#' Takes a file with EEMs and absorbance data and creates subfolders to store
 #' raw and processed data, plots, and output tables
 #'
 #' @param prjpath a string indicating the project file with the data
@@ -109,4 +109,42 @@ create_files <- function(prjpath){
   openxlsx::addWorksheet(wb, sheet_name)
   openxlsx::writeData(wb,sheet_name, df, rowNames = sampsascol)
   openxlsx::saveWorkbook(wb,file,overwrite = TRUE)
+}
+
+
+#' Find difference between EEMs samples
+#'
+#' @param eemlist1 object of class eemlist
+#' @param eemlist2 object of class eemlist
+#' @param sampnum numeric, the number of the sample in the eemlist you want to compare.
+#'
+#' @return a dataframe with the intensity at 10 different points for both EEMs
+#'
+samp_dif <- function(eemlist1, eemlist2, sampnum){
+  X1 <- eemlist1[[sampnum]]
+  X2 <- eemlist2[[sampnum]]
+
+  n_dif <- sum(!(X1$x == X2$x), na.rm=T)
+  cat("there are", n_dif, "samples that are not the same \n")
+
+  set.seed(9)
+  ex_samp <- sample(1:length(X1$ex), 10)
+  em_samp <- sample(1:length(X1$em), 10)
+  ints1 <- sapply(1:10, function(x){
+    ex <- ex_samp[x]
+    em <- em_samp[x]
+    val <- X1$x[em, ex]
+    val
+  })
+  ints2 <- sapply(1:10, function(x){
+    ex <- ex_samp[x]
+    em <- em_samp[x]
+    val <- X2$x[em, ex]
+    val
+  })
+
+  rand_samp <- data.frame(ex = X1$ex[ex_samp], em=X1$em[em_samp],
+                          int1 = ints1, int2 = ints2)
+
+  return(rand_samp)
 }

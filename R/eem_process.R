@@ -83,12 +83,12 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
   #remove raman scattering
   X_mask <- X_sub
   if(raman==T){
-    X_mask <- raman(X_mask, process_file=process_file_name, ...)
+    X_mask <- raman(X_mask, process_file=process_file_name, width_method = "manual", raman_mask = c(1.5,1.5,1.5,1.5))
   }
 
   #remove rayleigh scattering
   if(rayleigh ==T){
-    X_mask <- rayleigh(X_mask, process_file=process_file_name, ...)
+    X_mask <- rayleigh(X_mask, process_file=process_file_name, width_method="manual", rayleigh_mask = c(8,8,8,9))
   }
 
   #remove inner filtering effects

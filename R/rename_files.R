@@ -103,7 +103,6 @@ files_rename <- function(meta, prjpath){
 #' it renames the files to the sample identifier and creates folder for each
 #' file type in the main file directory.
 #'
-#' @importFrom utils zip
 #' @importFrom stringr str_detect
 #'
 #' @param prjpath the file path of the main file directory where data is located
@@ -126,7 +125,8 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T){
 
   #check metadata
   stopifnot(sum(is.na(meta$RSU_area_1s)) == 0 | "data_identifier" %in% colnames(meta),
-            "replicate_no" %in% colnames(meta), "integration_time_s" %in% colnames(meta))
+            "replicate_no" %in% colnames(meta), "integration_time_s" %in% colnames(meta),
+            "run_type" %in% colnames(meta))
 
   #check for duplicates that aren't marked as such
   meta_dup <- meta %>% group_by(data_identifier) %>% summarise(count=n())
@@ -142,12 +142,12 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T){
   row.names(meta) <- meta$unique_ID
 
   #zip raw files to have a backup
-  file_to_zip <- list.files(prjpath)[stringr::str_detect(list.files(prjpath), ".dat")]
+  file_to_zip <- paste(prjpath, list.files(prjpath)[stringr::str_detect(list.files(prjpath), ".dat")], sep="/")
 
   if(zip_files == T & length(file_to_zip) > 0){
     zip_name <- unlist(strsplit(prjpath, "/"))
     zip_name <- zip_name[length(zip_name)]
-    zip(paste("rawfiles_", zip_name, ".zip", sep=""), paste(file_to_zip, sep="/"))
+    zip(paste(prjpath, "/rawfiles_2", zip_name, ".zip", sep=""), file_to_zip, extras = '-j')
   }else if(length(file_to_zip) == 0 & zip_files == T){
     warning("No raw files were found to zip.")
   }
