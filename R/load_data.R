@@ -168,3 +168,56 @@ eem_name_replace <- function (eem_list, pattern, replacement)
   class(eem_list) <- "eemlist"
   eem_list
 }
+
+
+#' Checks to make sure samples and metadata match
+#'
+#' Takes the loaded EEMs and absorbance data and tries to match it to the 'unique_ID'
+#' in the metadata, if a sample is in the metadata but not in the loaded EEMs and
+#' absorbance it will remove that line in the metadata. If there are samples loaded
+#' not in the metadata it will warn and remove from the loaded samples.
+#'
+#' @param meta metadata table with sample information, needs to have a 'unique_ID' column
+#' @param eemlist object of class eemlist containing EEMs samples
+#' @param blanklist object of class eemlist containing the blanks for the EEMs samples, names should be same as eemlist with "_blank" at the end
+#' @param abs dataframe containing absorbance data corresponding to the EEMs samples
+#' @export
+#' @returns a list of metadata, eemlist, blanklist, and absorbance
+check_samps <- function(meta, eemlist, blanklist, abs){
+  stopifnot("unique_ID" %in% colnames(meta)| is.data.frame(meta),
+            is.data.frame(abs_data) | .is_eem(eemlist) |
+              .is_eemlist(blanklist))
+
+    for(m in meta$index){
+      #gets name of files that should be there
+      x <- which(meta$index == m)
+      name <- meta$unique_ID[x]
+
+      eem_check <- name %in% eem_names(eemlist)
+      blank_check <- paste(name, "_blank",sep="") %in% eem_names(blanklist)
+      abs_check <- name %in% colnames(Sabs)
+
+      if(eem_check == F | blank_check == F | abs_check ==F){
+        warning(paste("Sample", name, "wasn't found in the loaded EEMs and absorbance. Removing from metadata"))
+        meta <- meta[-x,]}
+    }
+
+    #checks if there's samples in EEMs that aren't in metadata
+    if(length(eemlist) > nrow(meta)){
+        missing_meta <- eem_names(eemlist)[!(eem_names(eemlist) %in% meta$unique_ID)]
+        eemlist <- eem_exclude(eemlist, exclude = list(sample=missing_meta))
+        blanklist <- eem_exclude(blanklist, exclude = list(sample=paste(missing_meta, "_blank", sep="")))
+        abs <- abs[,-(colnames(abs) %in% missing_meta)]
+        cat("Samples", paste(missing_meta, sep="\n"), "are not in metadata and will be removed", sep="\n")
+    }
+
+    #checks if absorbance matches eems
+    if((ncol(abs)-1) != length(eemlist) | length(eemlist) != length(blanklist)){
+      stop("mismatch occuring between absorbance and EEMs data, please check sample names")
+    }
+
+    list(meta, eemlist, blanklist, abs)
+  }
+
+
+

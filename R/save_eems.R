@@ -23,9 +23,9 @@ save_eems <- function(eem_list, abs_data, meta, prjpath){
   write.csv(abs_data, paste(save_loc,"Processed_Absorbance.csv", sep=""), quote=F, row.names = F)
 
   #save EEMs
-  lapply(1:nrow(meta), function(f){
-    file_name <- meta$unique_ID[f]
+  sapply(1:length(eem_list), function(f){
     eem_file <- eem_list[[f]]
+    file_name <- eem_file$sample
     eem_data <- eem_file$x
     eem_data <- as.data.frame(eem_data)
     row.names(eem_data) <- eem_file$em

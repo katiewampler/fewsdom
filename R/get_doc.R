@@ -22,10 +22,11 @@
 #' @param meta_sheet a string of the metadata sheet name, only required if the metadata file is an .xlsx file
 #' @param site_loc a vector indicating the start and end of the site name in the metadata data identifier
 #' @param rewrite a logical, if TRUE original metadata will be saved over with metadata with DOC results, if FALSE it will add "_doc_added" to the end of the table
+#' @param ... arguments to pass down to functions with 'get_doc'
 #' @export
 
 get_doc <- function(doc_file, doc_sheet=NULL, doc_column, name_column, nskip=0, doc_delim="-",
-                    meta_file, meta_sheet=NULL, site_loc=c(1,7), rewrite=T){
+                    meta_file, meta_sheet=NULL, site_loc=c(1,7), rewrite=T, ...){
   stopifnot(is.character(c(doc_file, doc_delim, meta_file)) |
               is.numeric(c(doc_column, name_column, nskip, site_loc))| file.exists(doc_file)|
               file.exists(meta_file))

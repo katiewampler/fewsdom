@@ -58,11 +58,12 @@ process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
                     doc_sheet=doc_sheet, doc_column=doc_column,
                     name_column=name_column, nskip=nskip,
                     doc_delim=doc_delim, meta_file=meta_file,
-                    meta_sheet=meta_sheet, site_loc=c(1,7), ...)
+                    meta_sheet=meta_sheet, site_loc=site_loc, ...)
   }
 
 
   #rename files and create and put in folders
+  cat("Renaming files and putting in files \n")
   meta <- clean_files(prjpath=prjpath, meta_file=meta_file,
                       meta_sheet = meta_sheet, zip_files=zip_files,...)
 
@@ -70,18 +71,29 @@ process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
   abs_preprocess(prjpath=prjpath)
 
   #Load Data in R
+  cat("Loading data in R \n")
   data<- load_eems(prjpath = prjpath)
   X <- data[[1]]
   X_blk <- data[[2]]
   Sabs <- data[[3]]
 
+  #Check data with metadata, remove samples that don't have data
+  test <- check_samps(meta, X, X_blk, Sabs)
+  meta <- test[[1]]
+  X <- test[[2]]
+  X_blk <- test[[3]]
+  Sabs <- test[[4]]
+
   ## Process the EEM's
+  cat("Processing EEMs and absorbance data \n")
   data_process <- eem_proccess(prjpath=prjpath, eemlist=X, blanklist=X_blk, abs=Sabs,
-                               process_file=process_file, meta=meta)
+                               process_file=process_file, meta=meta,...)
   X_clean <- data_process[[1]]
   abs_clean <- data_process[[2]]
 
   ## Report the Data
+  cat("Reporting EEMs and absorbance data \n")
+
   #create plots
   plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=F)
   plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=T,

@@ -119,7 +119,7 @@ create_files <- function(prjpath){
 #' @param sampnum numeric, the number of the sample in the eemlist you want to compare.
 #'
 #' @return a dataframe with the intensity at 10 different points for both EEMs
-#'
+#' @noRd
 samp_dif <- function(eemlist1, eemlist2, sampnum){
   X1 <- eemlist1[[sampnum]]
   X2 <- eemlist2[[sampnum]]
@@ -148,3 +148,40 @@ samp_dif <- function(eemlist1, eemlist2, sampnum){
 
   return(rand_samp)
 }
+
+
+#' Check for EEMs that are empty
+#'
+#' @param eem object of class eem or eemlist
+#' @param verbose if you want to print out which samples aren't empty
+#' @returns a vector of EEMs with empty EEMs tables (eem$x)
+#' @export
+#'
+empty_eems <- function(eem, verbose=T){
+  stopifnot(.is_eem(eem) | .is_eemlist(eem))
+
+  if (.is_eemlist(eem)) {
+    res <- sapply(eem, empty_eems, verbose=verbose)
+    res <- unlist(res)
+    return(res)
+  }
+
+    if(is.null(dim(eem$x)) == T){
+      blank_check <- T
+    }else{
+      blank_check <- ifelse(nrow(eem$x) == 0 | ncol(eem$x) == 0, TRUE, FALSE)
+    }
+
+  if(blank_check == T){
+    if(verbose==T){
+      cat("Sample", eem$sample, "has no EEMs data \n")
+    }
+    outcome <- eem$sample
+  }else{
+    if(verbose == T){
+      cat("There were no empty EEMs samples \n")
+    }
+    outcome <- c()
+  }
+  return(outcome)
+  }

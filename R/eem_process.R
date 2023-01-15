@@ -8,7 +8,7 @@
 #'
 #' @param prjpath the file path of the main file directory where data is located
 #' @param eemlist object of class eem or eemlist containing EEMs samples
-#' @param blanklist object of class eem or eemlist containing the blanks for the eem's samples should be the same length as eem
+#' @param blanklist object of class eem or eemlist containing the blanks for the EEMs samples should be the same length as eem
 #' @param abs dataframe containing absorbance data corresponding to the EEMs samples
 #' @param meta dataframe of metadata containing unique ID's, integration time, dilutions, and raman area for each sample, see example metadata for format
 #' @param process_file logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'
@@ -31,7 +31,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          meta, process_file=T, replace_blank=F,
                          raman=T, rayleigh=T, IFE=T, raman_norm=T,
                          dilute = T, ex_clip = c(247,450),
-                         em_clip = c(247,550), doc_norm=T, ...){
+                         em_clip = c(247,600), doc_norm=T, ...){
 
   stopifnot(is.character(prjpath) | .is_eemlist(eemlist) | .is_eem(eemlist) |
               .is_eemlist(blanklist) | .is_eem(blanklist)| is.data.frame(abs)|
@@ -69,7 +69,6 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     eem <- eemlist[[n]]
     if(replace_blank == T){
       blank <- eemlist[[which(stringr::str_detect(meta$unique_ID, "BLK|blk|blank|blank|BLANK") == T)[1]]]
-      write.table(paste(Sys.time(), "- instrument blank was subsituted for the first run blank", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
     } else{
       blank <- blanklist[[n]]
     }
@@ -78,19 +77,31 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     return(X_sub[[n]])
   }, replace_blank=replace_blank)
   class(X_sub) <- "eemlist"
+  if(length(empty_eems(X_sub, verbose=F)) >0){
+    stop("one or more of your EEMs has empty data after blank subtraction, use 'empty_eems' function to find out which ones")
+  }
   write.table(paste(Sys.time(), "- blanks were subtracted from samples", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
+
+  #remove blank that was used as instrument blank so code won't break during plotting
+  if(replace_blank ==T){
+    write.table(paste(Sys.time(), "- instrument blank was subsituted for the first run blank", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
+    blank <- eemlist[[which(stringr::str_detect(meta$unique_ID, "BLK|blk|blank|blank|BLANK") == T)[1]]]
+    X_sub <- eem_exclude(X_sub, exclude=list(ex=c(), em=c(), sample=blank$sample) )
+  }
 
   #remove raman scattering
   X_mask <- X_sub
   if(raman==T){
-    X_mask <- raman(X_mask, process_file=process_file_name, width_method = "manual", raman_mask = c(1.5,1.5,1.5,1.5))
+    X_mask <- raman(X_mask, process_file=process_file_name, ...)
   }
 
   #remove rayleigh scattering
   if(rayleigh ==T){
-    X_mask <- rayleigh(X_mask, process_file=process_file_name, width_method="manual", rayleigh_mask = c(8,8,8,9))
+    X_mask <- rayleigh(X_mask, process_file=process_file_name, ...)
   }
-
+  if(length(empty_eems(X_mask, verbose=F)) >0){
+    stop("one or more of your EEMs has empty data after removing scattering, use 'empty_eems' function to find out which ones")
+  }
   #remove inner filtering effects
   X_ife <- X_mask
   if(IFE==T){
@@ -100,7 +111,10 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
 
     X_ife <- eem_inner_filter_effect(X_ife, absorbance=abs)
     write.table(paste(Sys.time(), "- EEM's were corrected for inner filter effects", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
-  }
+    if(length(empty_eems(X_ife, verbose=F)) >0){
+      stop("one or more of your EEMs has empty data after correcting for inner filter effects, use 'empty_eems' function to find out which ones")
+    }
+    }
 
   #perform raman normalization
   X_norm <- X_ife
@@ -113,6 +127,9 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
       attr(X_norm[[f]], "is_raman_normalized") <- TRUE
       return(X_norm[[f]])
     })
+    if(length(empty_eems(X_norm, verbose=F)) >0){
+      stop("one or more of your EEMs has empty data after normalizing for raman area, use 'empty_eems' function to find out which ones")
+    }
     class(X_norm) <- "eemlist"
     write.table(paste(Sys.time(), "- EEM's were normalized by raman area", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)}
 
@@ -139,6 +156,9 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
         Sabs_dil_cor[,meta$abs_col[x]] <- abs[,meta$abs_col[x]] / dil_fact}
     }
   }
+  if(length(empty_eems(X_dil_cor, verbose=F)) >0){
+    stop("one or more of your EEMs has empty data after correcting for dilutions, use 'empty_eems' function to find out which ones")
+  }
 
   #normalize for DOC
   X_DOC <- X_dil_cor
@@ -158,17 +178,20 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
       return(X_DOC[[x]])
     })
     class(X_DOC) <- "eemlist"
-
+    if(length(empty_eems(X_DOC, verbose=F)) >0){
+      stop("one or more of your EEMs has empty data after DOC normalization, use 'empty_eems' function to find out which ones")
+    }
    write.table(paste(Sys.time(), "- EEM's were normalized by DOC concentration", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
   }
 
   #clip DOC normalized EEM's
   X_DOC_clip <- X_dil_cor
-  X_DOC_clip<- eemR::eem_cut(X_DOC_clip, ex=c(min(X_DOC_clip[[1]]$ex):ex_clip[1], ex_clip[2]:max(X_DOC_clip[[1]]$ex),exact=F ))
-  X_DOC_clip <- eemR::eem_cut(X_DOC_clip, em=c(min(X_DOC_clip[[1]]$em):em_clip[1], em_clip[2]:max(X_DOC_clip[[1]]$em),exact=F ))
+  X_DOC_clip<- eem_cut2(X_DOC_clip, ex=ex_clip, em=em_clip, exact=F)
   write.table(paste(Sys.time(), "- DOC Normalized EEM's were clipped to Excitation:",ex_clip[1]," to ", ex_clip[2],
                     " nm and Emission:",em_clip[1]," to ", em_clip[2], " nm", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
-
+  if(length(empty_eems(X_DOC_clip, verbose=F)) >0){
+    stop("one or more of your EEMs has empty data after clipping, use 'empty_eems' function to find out which ones")
+  }
  return(list(X_DOC_clip, Sabs_dil_cor))
 }
 
@@ -280,4 +303,75 @@ eem_inner_filter_effect <- function (eem, absorbance, pathlength = 1, verbose=F)
 
   attr(res, "is_ife_corrected") <- TRUE
   return(res)
+}
+
+#' Trim EEMs to specified emission and/or excitation wavelengths
+#'
+#' Modified from eemR 'eem_cut' function. The specified wavelengths are now the
+#' ones you keep, not the ones you remove.
+#'
+#' @param eem An object of class eem or eemlist.
+#' @param ex numerical of length two, with range of excitation wavelengths to keep
+#' @param em numerical of length two, with range of emission wavelengths to keep
+#' @param exact Logical. If TRUE, only wavelengths matching em and/or ex will be removed. If FALSE, all wavelengths in the range of em and/or ex will be removed.
+#' @param fill_with_na Logical. If TRUE, fluorescence values at specified wavelengths will be replaced with NA. If FALSE, these values will be removed.
+#'
+#' @return an object of class eem or eemlist
+#' @export
+#'
+eem_cut2 <- function (eem, ex, em, exact = FALSE, fill_with_na = FALSE) {
+  stopifnot(.is_eemlist(eem) | .is_eem(eem))
+  if (.is_eemlist(eem)) {
+    res <- lapply(eem, eem_cut2, ex = ex, em = em, exact = exact,
+                  fill_with_na = fill_with_na)
+    class(res) <- class(eem)
+    return(res)
+  }
+  if (!missing(ex)) {
+    stopifnot(is.numeric(ex), all(ex >= 0))
+    ex_range <- ex[1]:ex[2]
+    if (exact) {
+      index <- which(!(eem$ex %in% ex_range))
+      if(length(index) == length(eem$ex)){
+        warning("all excitation wavelengths were removed, try 'exact=F'.")
+      }
+    }
+    else {
+      index <- which(!(is_between(eem$ex, min(ex_range, na.rm = TRUE),
+                                  max(ex_range, na.rm = TRUE))))
+    }
+    if (length(index != 0)) {
+      if (fill_with_na) {
+        eem$x[, index] <- NA
+      }
+      else {
+        eem$ex <- eem$ex[-index]
+        eem$x <- eem$x[, -index]
+      }
+    }
+  }
+  if (!missing(em)) {
+    stopifnot(is.numeric(em), all(em >= 0))
+    em_range <- em[1]:em[2]
+    if (exact) {
+      index <- which(!(eem$em %in% em_range))
+      if(length(index) == length(eem$ex)){
+        warning("all excitation wavelengths were removed, try 'exact=F'.")
+      }
+    }
+    else {
+      index <- which(!(is_between(eem$em, min(em_range, na.rm = TRUE),
+                                  max(em_range, na.rm = TRUE))))
+    }
+    if (length(index != 0)) {
+      if (fill_with_na) {
+        eem$x[index, ] <- NA
+      }
+      else {
+        eem$em <- eem$em[-index]
+        eem$x <- eem$x[-index, ]
+      }
+    }
+  }
+  return(eem)
 }

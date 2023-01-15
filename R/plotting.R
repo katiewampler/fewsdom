@@ -243,11 +243,27 @@ plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
       pl <- pl + labs(title=pl_title) + theme(plot.title = element_text(size=10))
     }
   }
+  .is_zero <- function(eem){
+    zero <- sum(eem$x, na.rm=T)
+    if(zero == 0){eem$sample}
+  }
 
   #check inputs
   stopifnot(.is_eemlist(eem) | file.exists(prjpath) | is.data.frame(meta) |
             is.logical(sing_plot) | is.logical(sum_plot) |
               doc_norm %in% c(TRUE, FALSE, "both") | file.exists(prjpath))
+
+  #check EEM's for empty EEM's, zero EEM's or fully NA EEM's. which won't plot
+   empty <- empty_eems(eem, verbose = F)
+   zero <- unlist(sapply(1:length(eem), function(x){
+     .is_zero(eem[[x]])}))
+
+   eem_rm <- c(empty, zero)
+   if(is.null(eem_rm) == F){
+     eem <- eem_exclude(eem, exclude=list(sample=eem_rm))
+     warning("The following samples were exluded from plotting because they had only missing or zero data: \n",
+             paste(eem_rm, collapse ="\n"))
+   }
 
   #have spot to put data
   if(file.exists(paste(prjpath,  "/5_Processed/Figures", sep=""))==F){

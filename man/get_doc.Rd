@@ -14,7 +14,8 @@ get_doc(
   meta_file,
   meta_sheet = NULL,
   site_loc = c(1, 7),
-  rewrite = T
+  rewrite = T,
+  ...
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ get_doc(
 \item{site_loc}{a vector indicating the start and end of the site name in the metadata data identifier}
 
 \item{rewrite}{a logical, if TRUE original metadata will be saved over with metadata with DOC results, if FALSE it will add "_doc_added" to the end of the table}
+
+\item{...}{arguments to pass down to functions with 'get_doc'}
 }
 \description{
 Takes data from a separate table of DOC results and puts

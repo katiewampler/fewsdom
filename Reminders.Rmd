@@ -21,9 +21,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## THINGS TO DO 
--compare both width methods
+-error running 2022-08-25, 8/6
 -add examples to functions
--Write to loop through files so you can easily process everything the same way. 
+-Write to loop through files so you can easily process everything the same way?? table with doc data location and other parameters?? 
 -Create functions for combining individual files
 -Start on personal package with things I use a lot.  
 

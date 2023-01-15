@@ -18,7 +18,7 @@ eem_proccess(
   raman_norm = T,
   dilute = T,
   ex_clip = c(247, 450),
-  em_clip = c(247, 550),
+  em_clip = c(247, 600),
   doc_norm = T,
   ...
 )
@@ -28,7 +28,7 @@ eem_proccess(
 
 \item{eemlist}{object of class eem or eemlist containing EEMs samples}
 
-\item{blanklist}{object of class eem or eemlist containing the blanks for the eem's samples should be the same length as eem}
+\item{blanklist}{object of class eem or eemlist containing the blanks for the EEMs samples should be the same length as eem}
 
 \item{abs}{dataframe containing absorbance data corresponding to the EEMs samples}
 
