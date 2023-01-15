@@ -154,6 +154,8 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
     warning("No raw files were found to zip.")
   }
 
+  create_files(prjpath)
+
   #checks to see if there are files to rename
   if(sum(stringr::str_detect(list.files(prjpath), "SEM")) +
               sum(stringr::str_detect(list.files(prjpath), "Waterfall")) +
@@ -171,8 +173,6 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
     EEM <- EEM[!(EEM %in% c(Abs, blank))]
 
     stopifnot(length(Abs) > 0| length(blank) > 0| length(EEM) > 0)
-
-    create_files(prjpath)
 
     file.copy(paste(prjpath, "/", Abs, sep=""), paste(prjpath, "/1_Absorbance/",sep=""))
     file.copy(paste(prjpath, "/", blank, sep=""), paste(prjpath, "/2_Blanks/",sep=""))

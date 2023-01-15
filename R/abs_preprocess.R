@@ -47,14 +47,14 @@ abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
       #if run manually it has extra rows that aren't needed
       if(samp_runtype == "manual"){
         df <- df[,c(1,10)]
-        df <- subset(df, df$V1 <= 791) #it also doesn't end at the same spot, which throws an error if you have both manual and sample Q samples
       }
       if(nrow(df) > 188){
-        warning("Your absorbance data has too many rows, check if transmittence data got added. Data was clipped to the correct rows.")
+        warning(paste("Your absorbance data",  x, "has too many rows, check if transmittence data got added. Data was clipped to the correct rows.", sep=" "))
         df <- df[1:188,]
         df$V10 <- as.numeric(df$V10)
         df$V1 <- as.numeric(df$V1)
       }
+      df <- subset(df, df$V1 <= 791) #it also doesn't end at the same spot, which throws an error if you have both manual and sample Q samples
 
       colnames(df) <- c("Wavelength", "Abs")
       write.table(df, paste(prjpath, "/4_Clean_Absorbance/", x, ".csv", sep=""), row.names = F, col.names = F, quote = F, sep=",")

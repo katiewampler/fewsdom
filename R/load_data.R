@@ -185,9 +185,8 @@ eem_name_replace <- function (eem_list, pattern, replacement)
 #' @returns a list of metadata, eemlist, blanklist, and absorbance
 check_samps <- function(meta, eemlist, blanklist, abs){
   stopifnot("unique_ID" %in% colnames(meta)| is.data.frame(meta),
-            is.data.frame(abs_data) | .is_eem(eemlist) |
+            is.data.frame(abs) | .is_eem(eemlist) |
               .is_eemlist(blanklist))
-
     for(m in meta$index){
       #gets name of files that should be there
       x <- which(meta$index == m)
@@ -195,7 +194,7 @@ check_samps <- function(meta, eemlist, blanklist, abs){
 
       eem_check <- name %in% eem_names(eemlist)
       blank_check <- paste(name, "_blank",sep="") %in% eem_names(blanklist)
-      abs_check <- name %in% colnames(Sabs)
+      abs_check <- name %in% colnames(abs)
 
       if(eem_check == F | blank_check == F | abs_check ==F){
         warning(paste("Sample", name, "wasn't found in the loaded EEMs and absorbance. Removing from metadata"))

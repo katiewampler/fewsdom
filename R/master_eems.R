@@ -68,7 +68,7 @@ process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
                       meta_sheet = meta_sheet, zip_files=zip_files,...)
 
   #convert absorbance files from .dat to .csv
-  abs_preprocess(prjpath=prjpath)
+  abs_preprocess(prjpath=prjpath, "mixed", meta)
 
   #Load Data in R
   cat("Loading data in R \n")

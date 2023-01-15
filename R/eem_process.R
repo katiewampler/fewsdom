@@ -127,10 +127,10 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
       attr(X_norm[[f]], "is_raman_normalized") <- TRUE
       return(X_norm[[f]])
     })
+    class(X_norm) <- "eemlist"
     if(length(empty_eems(X_norm, verbose=F)) >0){
       stop("one or more of your EEMs has empty data after normalizing for raman area, use 'empty_eems' function to find out which ones")
     }
-    class(X_norm) <- "eemlist"
     write.table(paste(Sys.time(), "- EEM's were normalized by raman area", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)}
 
   #account for dilutions
