@@ -96,8 +96,12 @@ process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
 
   #create plots
   plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=F)
-  plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=T,
-            save_names="_DOC")
+
+  if(sum(is.na(meta$DOC_mg_L)) < nrow(meta)){
+    plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=T,
+              save_names="_DOC")
+  }
+
 
   #save indices
   get_indices(X_clean, abs_clean, meta, prjpath=prjpath, doc_norm="both",

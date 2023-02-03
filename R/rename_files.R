@@ -163,7 +163,7 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
               sum(stringr::str_detect(list.files(prjpath), "BEM")) +
               sum(stringr::str_detect(list.files(prjpath), "ABS")) > 0){
     #rename files
-    files_rename(meta=meta, prjpath=prjpath)
+    files_rename(meta=meta, prjpath=prjpath)}
 
     #identify EEMs and Absorbance files
     files <- list.files(prjpath)
@@ -186,7 +186,6 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
     if(length(EEM) != length(blank) & length(EEM) != length(Abs)){
       stop("Warning: Your samples aren't matched, you're missing absorbance or EEM's data")
     }
-  }
 
   return(meta)
 }
