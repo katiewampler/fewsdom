@@ -6,6 +6,7 @@ Authors@R: person("Katie A.", "Wampler", email = "katie.wampler@oregonstate.edu"
   role = c("aut", "cre"))
 Description: Collection of functions used to process raw data collected 
     from a Horiba Aqualog, output cleaned data, indicies, and plots.
+Date: 2023-02-02
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
