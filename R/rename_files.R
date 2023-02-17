@@ -120,7 +120,7 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
 
   #Load Sample Log
   if(stringr::str_detect(meta_file, ".xlsx")){
-    meta <- openxlsx::readWorkbook(meta_file, sheet=meta_sheet, detectDates = T)
+    meta <- openxlsx::readWorkbook(xlsxFile=meta_file, sheet=meta_sheet, detectDates = T)
   } else{
     meta <- read.csv(meta_file)
   }
@@ -131,7 +131,7 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
             "run_type" %in% colnames(meta))
 
   #check for duplicates that aren't marked as such
-  meta_dup <- meta %>% filter(replicate_no == 1) %>% group_by(data_identifier) %>% summarise(count=n())
+  meta_dup <- meta %>% dplyr::filter(replicate_no == 1) %>% dplyr::group_by(data_identifier) %>% dplyr::summarise(count=n())
   dups <- meta_dup$data_identifier[meta_dup$count > 1]
   for(x in dups){
     ndups <- meta_dup$count[meta_dup$data_identifier == x]
@@ -149,7 +149,7 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
   if(zip_files == T & length(file_to_zip) > 0){
     zip_name <- unlist(strsplit(prjpath, "/"))
     zip_name <- zip_name[length(zip_name)]
-    zip(paste(prjpath, "/rawfiles_2", zip_name, ".zip", sep=""), paste(prjpath, file_to_zip, sep="/"), extras = '-j')
+    zip(paste(prjpath, "/rawfiles_", zip_name, ".zip", sep=""), paste(prjpath, file_to_zip, sep="/"), extras="-j")
   }else if(length(file_to_zip) == 0 & zip_files == T){
     warning("No raw files were found to zip.")
   }
@@ -167,20 +167,22 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
 
     #identify EEMs and Absorbance files
     files <- list.files(prjpath)
-    Abs <- files[str_detect(files, "_Abs.dat")]
-    blank <- files[str_detect(files, "_blank.dat")]
-    EEM <- files[str_detect(files, ".dat")]
+    Abs <- files[stringr::str_detect(files, "_Abs.dat")]
+    blank <- files[stringr::str_detect(files, "_blank.dat")]
+    EEM <- files[stringr::str_detect(files, ".dat")]
     EEM <- EEM[!(EEM %in% c(Abs, blank))]
 
-    stopifnot(length(Abs) > 0| length(blank) > 0| length(EEM) > 0)
+    if((length(Abs) > 0| length(blank) > 0| length(EEM) > 0)){
+      file.copy(paste(prjpath, "/", Abs, sep=""), paste(prjpath, "/1_Absorbance/",sep=""))
+      file.copy(paste(prjpath, "/", blank, sep=""), paste(prjpath, "/2_Blanks/",sep=""))
+      file.copy(paste(prjpath, "/", EEM, sep=""), paste(prjpath, "/3_Samples/",sep=""))
 
-    file.copy(paste(prjpath, "/", Abs, sep=""), paste(prjpath, "/1_Absorbance/",sep=""))
-    file.copy(paste(prjpath, "/", blank, sep=""), paste(prjpath, "/2_Blanks/",sep=""))
-    file.copy(paste(prjpath, "/", EEM, sep=""), paste(prjpath, "/3_Samples/",sep=""))
+      file.remove(paste(prjpath, "/", Abs, sep=""))
+      file.remove(paste(prjpath, "/", blank, sep=""))
+      file.remove(paste(prjpath, "/", EEM, sep=""))
+    }
 
-    file.remove(paste(prjpath, "/", Abs, sep=""))
-    file.remove(paste(prjpath, "/", blank, sep=""))
-    file.remove(paste(prjpath, "/", EEM, sep=""))
+
 
     #check you have absorbance, blank, and sample data for each sample
     if(length(EEM) != length(blank) & length(EEM) != length(Abs)){
