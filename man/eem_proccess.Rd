@@ -78,3 +78,11 @@ Takes EEMs data with blanks and absorbance data and will perform processing
 steps including blank subtraction, removing raman and rayleigh scattering,
 dilution correction, removing inner filtering effects, raman normalization.
 }
+\examples{
+\dontrun{
+data_process <- eem_proccess(prjpath=prjpath, eemlist=X, blanklist=X_blk, abs=Sabs,
+process_file=process_file, meta=meta)
+}
+X_clean <- data_process[[1]]
+abs_clean <- data_process[[2]]
+}

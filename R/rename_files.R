@@ -112,9 +112,15 @@ files_rename <- function(meta, prjpath){
 #' @return metadata table with an added column for the unique ID
 #'
 #' @export
+#' @examples
+#' \dontrun{
+#' meta <- clean_files(prjpath=prjpath, meta_file=meta_file,
+#' meta_sheet = meta_sheet)
+#' }
+#'
 
-clean_files <- function(prjpath, meta_file, meta_sheet, ...){
-  stopifnot(is.character(c(prjpath, meta_sheet, meta_file))| file.exists(prjpath))
+clean_files <- function(prjpath, meta_file, meta_sheet=NULL, ...){
+  stopifnot(is.character(c(prjpath, meta_file))| file.exists(prjpath))
 
   #Load Sample Log
   if(stringr::str_detect(meta_file, ".xlsx")){

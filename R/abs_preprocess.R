@@ -12,6 +12,10 @@
 #' @param runtype indicates how data was run on the Aqualog, either "manual", "sampleQ", or "mixed". If "mixed" it will get run type from the metadata
 #' @param meta the metadata table for the sample run, only required if runtype is "mixed"
 #' @export
+#' @examples
+#' \dontrun{
+#'   abs_preprocess(prjpath=prjpath, "mixed", meta)
+#' }
 
 abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
   stopifnot(is.character(prjpath)|runtype %in% c("manual","sampleQ", "mixed")|

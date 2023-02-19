@@ -9,7 +9,13 @@
 #'
 #' @param prjpath The file path of the main file directory where data is located
 #' @export
-#'
+#' @examples
+#' \dontrun{
+#'   raw_eem <- load_eems(prjpath = prjpath)
+#' }
+#'  X <- raw_eem[[1]] #the raw eem samples
+#'  X_blk <- raw_eem[[2]] #the matching blanks
+#'  Sabs <- raw_eem[[3]] #the matching absorbance data
 
 load_eems <- function(prjpath){
   stopifnot(is.character(prjpath) | file.exists(prjpath))

@@ -10,8 +10,7 @@ rayleigh(
   rayleigh_width = "auto",
   rayleigh_interp = c(F, F),
   process_file = NULL,
-  verbose = F,
-  ...
+  verbose = F
 )
 }
 \arguments{

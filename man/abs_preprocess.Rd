@@ -21,3 +21,8 @@ the staRdom package.
 \details{
 Use 'clean_files' function before running this function to ensure file structure is correct for pre-processing.
 }
+\examples{
+\dontrun{
+  abs_preprocess(prjpath=prjpath, "mixed", meta)
+}
+}

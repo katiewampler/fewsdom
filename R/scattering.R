@@ -226,7 +226,7 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
 #' @param verbose a logical, if TRUE will print out widths used to mask via the auto width method
 #' @export
 
-rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), rayleigh_width="auto", rayleigh_interp=c(F,F), process_file=NULL, verbose=F, ...){
+rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), rayleigh_width="auto", rayleigh_interp=c(F,F), process_file=NULL, verbose=F){
   #function checks
   stopifnot(.is_eemlist(eem) | is.numeric(rayleigh_mask)|length(rayleigh_mask)==4|
               rayleigh_width %in% c("auto", "manual")| length(rayleigh_interp)==2 |
@@ -282,7 +282,7 @@ rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), rayleigh_width="auto", r
 #' @export
 
 raman <- function(eem, raman_mask=c(8,8,1.5,1.5), raman_width="auto", raman_interp=c(T,T),
-                  process_file=NULL, verbose=F, ....){
+                  process_file=NULL, verbose=F){
   #function checks
   stopifnot(.is_eemlist(eem) | is.numeric(raman_mask)|length(raman_mask)==4|
               raman_width %in% c("auto", "manual")| length(raman_interp)==2 |

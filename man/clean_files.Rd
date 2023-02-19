@@ -4,7 +4,7 @@
 \alias{clean_files}
 \title{Renames and organizes files from default Aqualog files}
 \usage{
-clean_files(prjpath, meta_file, meta_sheet, ...)
+clean_files(prjpath, meta_file, meta_sheet = NULL, ...)
 }
 \arguments{
 \item{prjpath}{the file path of the main file directory where data is located}
@@ -22,4 +22,11 @@ metadata table with an added column for the unique ID
 Takes the default files from the Aqualog (absorbance, blank, and sample)
 it renames the files to the sample identifier and creates folder for each
 file type in the main file directory.
+}
+\examples{
+\dontrun{
+meta <- clean_files(prjpath=prjpath, meta_file=meta_file,
+meta_sheet = meta_sheet)
+}
+
 }

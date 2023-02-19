@@ -49,3 +49,8 @@ first column in the unique ID's for the samples and the second column is the tit
 is chosen it will use the description column of the metadata. If 'sampleID' is chosen it will
 use the unique identifier column from the metadata. Lastly if FALSE is chosen no titles will be added.
 }
+\examples{
+\dontrun{
+  plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=F)
+}
+}

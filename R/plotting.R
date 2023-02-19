@@ -207,7 +207,10 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
 #' is chosen it will use the description column of the metadata. If 'sampleID' is chosen it will
 #' use the unique identifier column from the metadata. Lastly if FALSE is chosen no titles will be added.
 #' @export
-#'
+#' @examples
+#' \dontrun{
+#'   plot_eems(prjpath = prjpath, meta=meta, eem=X_clean, doc_norm=F)
+#' }
 
 plot_eems <- function(prjpath, meta, eem, sing_plot=T, sum_plot=T, doc_norm=T,
                       ncol=4, title="description", save_names = "", ...){
