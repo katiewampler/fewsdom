@@ -7,10 +7,11 @@
 raman(
   eem,
   raman_mask = c(8, 8, 1.5, 1.5),
-  width_method = "auto",
+  raman_width = "auto",
   raman_interp = c(T, T),
   process_file = NULL,
-  verbose = F
+  verbose = F,
+  ....
 )
 }
 \arguments{
@@ -18,7 +19,7 @@ raman(
 
 \item{raman_mask}{a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified}
 
-\item{width_method}{either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function}
+\item{raman_width}{either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function}
 
 \item{raman_interp}{a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second}
 

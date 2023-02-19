@@ -21,6 +21,10 @@
 #' @param ex_clip vector of length two with the excitation wavelengths to clip the EEMs to
 #' @param em_clip vector of length two with the emission wavelengths to clip the EEMs to
 #' @param doc_norm logical, if TRUE will normalize any EEMs with DOC data to 1 mg/L carbon
+#' @param raman_mask a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified
+#' @param raman_width either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function
+#' @param rayleigh_mask optional if auto width method is used, a vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line
+#' @param rayleigh_width either "auto" or "manual", if auto is chosen cutting widths will be found using the 'find_cut_width' function
 #' @param ... arguments passed on to scattering functions 'raman' and 'rayleigh'
 #' @return an list where the first object is of class eemlist with processed EEMs samples. The
 #' second object is a dataframe with the processes absorbance data.
@@ -31,7 +35,10 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          meta, process_file=T, replace_blank=F,
                          raman=T, rayleigh=T, IFE=T, raman_norm=T,
                          dilute = T, ex_clip = c(247,450),
-                         em_clip = c(247,600), doc_norm=T, ...){
+                         em_clip = c(247,600), doc_norm=T,
+                         raman_width ="auto", raman_mask= c(8,8,1.5,1.5),
+                         rayleigh_width="auto", rayleigh_mask = c(20,10,10,10),
+                         ...){
 
   stopifnot(is.character(prjpath) | .is_eemlist(eemlist) | .is_eem(eemlist) |
               .is_eemlist(blanklist) | .is_eem(blanklist)| is.data.frame(abs)|
@@ -92,12 +99,14 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
   #remove raman scattering
   X_mask <- X_sub
   if(raman==T){
-    X_mask <- raman(X_mask, process_file=process_file_name, ...)
+    X_mask <- raman(X_mask, process_file=process_file_name, raman_width=raman_width,
+                    raman_mask = raman_mask,...)
   }
 
   #remove rayleigh scattering
   if(rayleigh ==T){
-    X_mask <- rayleigh(X_mask, process_file=process_file_name, ...)
+    X_mask <- rayleigh(X_mask, process_file=process_file_name,
+                       rayleigh_width = rayleigh_width, rayleigh_mask=rayleigh_mask,...)
   }
   if(length(empty_eems(X_mask, verbose=F)) >0){
     stop("one or more of your EEMs has empty data after removing scattering, use 'empty_eems' function to find out which ones")

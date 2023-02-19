@@ -20,6 +20,10 @@ eem_proccess(
   ex_clip = c(247, 450),
   em_clip = c(247, 600),
   doc_norm = T,
+  raman_width = "auto",
+  raman_mask = c(8, 8, 1.5, 1.5),
+  rayleigh_width = "auto",
+  rayleigh_mask = c(20, 10, 10, 10),
   ...
 )
 }
@@ -53,6 +57,14 @@ eem_proccess(
 \item{em_clip}{vector of length two with the emission wavelengths to clip the EEMs to}
 
 \item{doc_norm}{logical, if TRUE will normalize any EEMs with DOC data to 1 mg/L carbon}
+
+\item{raman_width}{either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function}
+
+\item{raman_mask}{a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified}
+
+\item{rayleigh_width}{either "auto" or "manual", if auto is chosen cutting widths will be found using the 'find_cut_width' function}
+
+\item{rayleigh_mask}{optional if auto width method is used, a vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line}
 
 \item{...}{arguments passed on to scattering functions 'raman' and 'rayleigh'}
 }

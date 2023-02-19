@@ -17,7 +17,6 @@ process_eems(
   doc_delim = "-",
   meta_sheet = "log",
   site_loc = c(1, 7),
-  zip_files = T,
   process_file = T,
   ...
 )
@@ -44,8 +43,6 @@ process_eems(
 \item{meta_sheet}{a string of the metadata sheet name, only required if the metadata file is an .xlsx file}
 
 \item{site_loc}{a vector indicating the start and end of the site name in the metadata data identifier}
-
-\item{zip_files}{will create a zip file in the file directory of all the raw, non-renamed files from the Aqualog as a backup}
 
 \item{process_file}{logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'}
 

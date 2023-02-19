@@ -108,15 +108,13 @@ files_rename <- function(meta, prjpath){
 #' @param prjpath the file path of the main file directory where data is located
 #' @param meta_file file location of metadata table, used to determine how samples were run
 #' @param meta_sheet optional, sheet name of the metadata only required if metadata is an .xlsx file
-#' @param zip_files will create a zip file in the file directory of all the raw, non-renamed files from the Aqualog as a backup
 #' @param ... arguments to pass down to functions with 'clean_files'
 #' @return metadata table with an added column for the unique ID
 #'
 #' @export
 
-clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
-  stopifnot(is.character(c(prjpath, meta_sheet, meta_file))|
-              is.logical(zip_files)| file.exists(prjpath))
+clean_files <- function(prjpath, meta_file, meta_sheet, ...){
+  stopifnot(is.character(c(prjpath, meta_sheet, meta_file))| file.exists(prjpath))
 
   #Load Sample Log
   if(stringr::str_detect(meta_file, ".xlsx")){
@@ -142,17 +140,6 @@ clean_files <- function(prjpath, meta_file, meta_sheet, zip_files=T, ...){
   meta$unique_ID <- paste(meta$data_identifier, "_", meta$replicate_no, "_", meta$integration_time_s, "s", sep="")
   meta <- as.data.frame(meta)
   row.names(meta) <- meta$unique_ID
-
-  #zip raw files to have a backup
-  file_to_zip <- list.files(prjpath)[stringr::str_detect(list.files(prjpath), ".dat")]
-
-  if(zip_files == T & length(file_to_zip) > 0){
-    zip_name <- unlist(strsplit(prjpath, "/"))
-    zip_name <- zip_name[length(zip_name)]
-    zip(paste(prjpath, "/rawfiles_", zip_name, ".zip", sep=""), paste(prjpath, file_to_zip, sep="/"), extras="-j")
-  }else if(length(file_to_zip) == 0 & zip_files == T){
-    warning("No raw files were found to zip.")
-  }
 
   create_files(prjpath)
 

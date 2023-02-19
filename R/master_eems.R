@@ -14,7 +14,6 @@
 #' @param doc_delim a string indicating the separation between site name and other identifiers in the DOC data, it will only keep the first piece, only required if get_doc is TRUE
 #' @param meta_sheet a string of the metadata sheet name, only required if the metadata file is an .xlsx file
 #' @param site_loc a vector indicating the start and end of the site name in the metadata data identifier
-#' @param zip_files will create a zip file in the file directory of all the raw, non-renamed files from the Aqualog as a backup
 #' @param process_file logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'
 #' @param ... additional arguments passed to the 'get_doc', 'clean_files', 'abs_preprocess', 'load_eems', 'eem_process', 'plot_eems', 'get_indices', 'save_eems' functions
 #'
@@ -49,7 +48,7 @@
 process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
                          doc_column=7, name_column=4, nskip=3,
                          doc_delim="-", meta_sheet="log", site_loc=c(1,7),
-                         zip_files=T,process_file=T, ...){
+                          process_file=T, ...){
   run_date <- stringr::str_replace_all(run_date, "-", "_")
   meta_file <- paste(prjpath,"/metatable_manual_", run_date, ".xlsx", sep="")
 
@@ -65,7 +64,7 @@ process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
   #rename files and create and put in folders
   cat("Renaming files and putting in files \n")
   meta <- clean_files(prjpath=prjpath, meta_file=meta_file,
-                      meta_sheet = meta_sheet, zip_files=zip_files,...)
+                      meta_sheet = meta_sheet,...)
 
   #convert absorbance files from .dat to .csv
   abs_preprocess(prjpath=prjpath, "mixed", meta)

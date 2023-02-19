@@ -7,10 +7,11 @@
 rayleigh(
   eem,
   rayleigh_mask = c(20, 10, 10, 10),
-  width_method = "auto",
+  rayleigh_width = "auto",
   rayleigh_interp = c(F, F),
   process_file = NULL,
-  verbose = F
+  verbose = F,
+  ...
 )
 }
 \arguments{
@@ -18,7 +19,7 @@ rayleigh(
 
 \item{rayleigh_mask}{optional if auto width method is used, a vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line}
 
-\item{width_method}{either "auto" or "manual", if auto is chosen cutting widths will be found using the 'find_cut_width' function}
+\item{rayleigh_width}{either "auto" or "manual", if auto is chosen cutting widths will be found using the 'find_cut_width' function}
 
 \item{rayleigh_interp}{a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second}
 

@@ -4,7 +4,7 @@
 \alias{clean_files}
 \title{Renames and organizes files from default Aqualog files}
 \usage{
-clean_files(prjpath, meta_file, meta_sheet, zip_files = T, ...)
+clean_files(prjpath, meta_file, meta_sheet, ...)
 }
 \arguments{
 \item{prjpath}{the file path of the main file directory where data is located}
@@ -12,8 +12,6 @@ clean_files(prjpath, meta_file, meta_sheet, zip_files = T, ...)
 \item{meta_file}{file location of metadata table, used to determine how samples were run}
 
 \item{meta_sheet}{optional, sheet name of the metadata only required if metadata is an .xlsx file}
-
-\item{zip_files}{will create a zip file in the file directory of all the raw, non-renamed files from the Aqualog as a backup}
 
 \item{...}{arguments to pass down to functions with 'clean_files'}
 }
