@@ -163,6 +163,16 @@ second object is a dataframe with the processes absorbance data.
 If a process file is given, a file will be created in the processes folder of the file directory</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">data_process</span> <span class="op">&lt;-</span> <span class="fu">eem_proccess</span><span class="op">(</span>prjpath<span class="op">=</span><span class="va">prjpath</span>, eemlist<span class="op">=</span><span class="va">X</span>, blanklist<span class="op">=</span><span class="va">X_blk</span>, abs<span class="op">=</span><span class="va">Sabs</span>,</span></span>
+<span class="r-in"><span>process_file<span class="op">=</span><span class="va">process_file</span>, meta<span class="op">=</span><span class="va">meta</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">X_clean</span> <span class="op">&lt;-</span> <span class="va">data_process</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">abs_clean</span> <span class="op">&lt;-</span> <span class="va">data_process</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

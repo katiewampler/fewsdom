@@ -25,6 +25,9 @@
     <loc>https://katiewampler.github.io/fewsdom/reference/create_files.html</loc>
   </url>
   <url>
+    <loc>https://katiewampler.github.io/fewsdom/reference/data_process.html</loc>
+  </url>
+  <url>
     <loc>https://katiewampler.github.io/fewsdom/reference/eem_coble_peaks2.html</loc>
   </url>
   <url>
@@ -61,6 +64,12 @@
     <loc>https://katiewampler.github.io/fewsdom/reference/load_eems.html</loc>
   </url>
   <url>
+    <loc>https://katiewampler.github.io/fewsdom/reference/meta.html</loc>
+  </url>
+  <url>
+    <loc>https://katiewampler.github.io/fewsdom/reference/meta_clean.html</loc>
+  </url>
+  <url>
     <loc>https://katiewampler.github.io/fewsdom/reference/plot_eems.html</loc>
   </url>
   <url>
@@ -70,10 +79,10 @@
     <loc>https://katiewampler.github.io/fewsdom/reference/raman.html</loc>
   </url>
   <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/rayleigh.html</loc>
+    <loc>https://katiewampler.github.io/fewsdom/reference/raw_eem.html</loc>
   </url>
   <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/sample_metadata.html</loc>
+    <loc>https://katiewampler.github.io/fewsdom/reference/rayleigh.html</loc>
   </url>
   <url>
     <loc>https://katiewampler.github.io/fewsdom/reference/save_eems.html</loc>

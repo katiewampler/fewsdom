@@ -58,6 +58,16 @@ eemlists. It will also check to see if maximum absorbance is below 0.3.</p>
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">raw_eem</span> <span class="op">&lt;-</span> <span class="fu">load_eems</span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span> <span class="va">X</span> <span class="op">&lt;-</span> <span class="va">raw_eem</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="co">#the raw eem samples</span></span></span>
+<span class="r-in"><span> <span class="va">X_blk</span> <span class="op">&lt;-</span> <span class="va">raw_eem</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="co">#the matching blanks</span></span></span>
+<span class="r-in"><span> <span class="va">Sabs</span> <span class="op">&lt;-</span> <span class="va">raw_eem</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span> <span class="co">#the matching absorbance data</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
