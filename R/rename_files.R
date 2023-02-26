@@ -161,6 +161,7 @@ clean_files <- function(prjpath, meta_file, meta_sheet=NULL, ...){
 
     #identify EEMs and Absorbance files
     files <- list.files(prjpath)
+    files <- files[reader::get.ext(files)=="dat"]
     Abs <- files[stringr::str_detect(files, "_Abs.dat")]
     blank <- files[stringr::str_detect(files, "_blank.dat")]
     EEM <- files[stringr::str_detect(files, ".dat")]
