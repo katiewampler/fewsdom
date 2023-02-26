@@ -27,7 +27,8 @@ Imports:
 	tidyr,
 	foreach, 
 	eemR, 
-	gridExtra
+	gridExtra,
+	reader
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)

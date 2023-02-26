@@ -4,6 +4,7 @@
 #' across all run types and runs for consistent analysis and processing later.
 #'
 #' @importFrom stringr str_detect str_sub
+#' @importFrom reader get.ext
 #'
 #' @param meta the metadata table for the sample run
 #' @param prjpath a string indicating the project file containing the data to process, they should not be in subfiles
@@ -14,7 +15,7 @@ files_rename <- function(meta, prjpath){
 
   #correct for any blanks not listed as B1
   file_correct <- list.files(prjpath)
-  file_correct <- file_correct[stringr::str_detect(file_correct, ".dat")]
+  file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
   correct <- file_correct[!stringr::str_detect(file_correct, "B1")]
   if(length(correct)> 0){
     correct_names <- stringr::str_sub(correct, start=3)
