@@ -4,7 +4,7 @@
 #'
 #' @importFrom stringr str_replace_all
 #' @param prjpath path to folder with raw samples
-#' @param run_date date the samples were run, this should correspond to the file where all the samples are stored
+#' @param meta_name the file name of the metadata with the extension
 #' @param get_doc logical, if TRUE will use 'get_doc' function to match DOC data to metadata samples, only required if get_doc is TRUE
 #' @param doc_file a string of the file path of the DOC file, can be .xlsx or .csv, only required if get_doc is TRUE
 #' @param doc_sheet a string of the sheet name of the DOC results, only required if the DOC file is an .xlsx file, only required if get_doc is TRUE
@@ -45,12 +45,11 @@
 #'
 #' @export
 #'
-process_eems <- function(prjpath, run_date, get_doc=T, doc_file, doc_sheet,
+run_eems <- function(prjpath, meta_name, get_doc=T, doc_file, doc_sheet,
                          doc_column=7, name_column=4, nskip=3,
                          doc_delim="-", meta_sheet="log", site_loc=c(1,7),
                           process_file=T, ...){
-  run_date <- stringr::str_replace_all(run_date, "-", "_")
-  meta_file <- paste(prjpath,"/metatable_manual_", run_date, ".xlsx", sep="")
+  meta_file <- paste(prjpath,"/", meta_name, sep="")
 
   if(get_doc == T){
     meta <- get_doc(doc_file=doc_file,
