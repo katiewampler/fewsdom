@@ -73,9 +73,6 @@
     <loc>https://katiewampler.github.io/fewsdom/reference/plot_eems.html</loc>
   </url>
   <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/process_eems.html</loc>
-  </url>
-  <url>
     <loc>https://katiewampler.github.io/fewsdom/reference/raman.html</loc>
   </url>
   <url>
@@ -83,6 +80,9 @@
   </url>
   <url>
     <loc>https://katiewampler.github.io/fewsdom/reference/rayleigh.html</loc>
+  </url>
+  <url>
+    <loc>https://katiewampler.github.io/fewsdom/reference/run_eems.html</loc>
   </url>
   <url>
     <loc>https://katiewampler.github.io/fewsdom/reference/save_eems.html</loc>
