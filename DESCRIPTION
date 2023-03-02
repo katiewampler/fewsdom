@@ -28,8 +28,14 @@ Imports:
 	foreach, 
 	eemR, 
 	gridExtra,
-	reader
+	reader 
+Remotes: 
+  coolbutuseless/displease
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
 URL: https://katiewampler.github.io/fewsdom/
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

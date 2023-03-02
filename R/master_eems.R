@@ -107,4 +107,7 @@ run_eems <- function(prjpath, meta_name, get_doc=T, doc_file, doc_sheet,
 
   #save raw files (eems, abs)
   save_eems(X_clean, abs_clean, meta, prjpath=prjpath)
+
+  cat(" \n EEM's have been successfully processed. Look in the 5_Processed folder for plots and indices \n")
+
 }

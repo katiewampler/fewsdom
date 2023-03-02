@@ -455,9 +455,6 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
     if(nrow(abs_df) > 0){
       .OSU_excel(wb_name, "abs_indices", abs_df, sampsascol)
     }else{warning("No DOC data was provided, absorbance metrics were not calculated")}
-
-  cat("Spectral Indices have been saved")
-  cat("\n")
 }
 
 #' Exclude complete wavelengths or samples form data set
