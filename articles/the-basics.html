@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fewsdom</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,9 +70,254 @@
 
     
     
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>This a guide to walk through how to analyze EEM’s and aborbance data
+collected via a Horiba Aqualog using the ‘fewsdom’ package in R. While
+it was designed to minimize the lines of visible code needed to process
+samples by creating a single function (process_eems) to run all the
+processing steps, this comes at the cost of making it a little harder to
+customize the processing steps.</p>
+<p>This guide will walk through the steps to process raw EEM’s using the
+main summary function. To have a look at the underlying functions see
+the fewsdom: underlying functions R markdown.</p>
+</div>
+<div class="section level2">
+<h2 id="processing-samples-the-default-way">Processing Samples the Default Way<a class="anchor" aria-label="anchor" href="#processing-samples-the-default-way"></a>
+</h2>
+<div class="section level3">
+<h3 id="step-1-install-the-fewsdom-package">Step 1: Install the fewsdom package<a class="anchor" aria-label="anchor" href="#step-1-install-the-fewsdom-package"></a>
+</h3>
+<p>The ‘fewsdom’ package is currently only available on github, there is
+a hope to tidy further and submit to CRAN at some point. Thus to install
+the package, run the following lines of code.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
+<span><span class="fu">install_github</span><span class="op">(</span><span class="st">"katiewampler/fewsdom"</span><span class="op">)</span></span></code></pre></div>
+<p>You will also want to install Rtools (<a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link uri">https://cran.r-project.org/bin/windows/Rtools/</a>) if you
+have not already. If you have already done both of these things before,
+then you’ll just need to load the library.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://katiewampler.github.io/fewsdom/">fewsdom</a></span><span class="op">)</span></span></code></pre></div>
-  </main>
+</div>
+<div class="section level3">
+<h3 id="step-2-specify-where-the-data-to-analyze-is">Step 2: Specify where the data to analyze is<a class="anchor" aria-label="anchor" href="#step-2-specify-where-the-data-to-analyze-is"></a>
+</h3>
+<p>The ‘fewsdom’ package is designed so you direct it at a folder with
+raw data and it will organize the data, process it, and report it all in
+that folder so you have your finished results contained in that folder.
+Thus the most important part of running data is to tell it where your
+data folder is.</p>
+<p>In our lab, we have a new date folder for each sample run, separated
+by project, so we specify the date the data was run, the project, and
+this creates a variable ‘prjpath’ which is where all your data is.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">run_date</span> <span class="op">&lt;-</span> <span class="st">"2022_11_14"</span> </span>
+<span><span class="va">project</span> <span class="op">&lt;-</span> <span class="st">"2_PNNL_DOM/"</span> </span>
+<span><span class="va">prjpath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"T:/Research/Aqualog_Data/"</span>, <span class="va">project</span>, <span class="va">run_date</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<p>For the purposes of this example, we’ll use the example data within
+the package. We’ll also copy this data to a new folder so we preserve
+the original data.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"fewsdom_example_data"</span>, package <span class="op">=</span> <span class="st">"fewsdom"</span><span class="op">)</span> <span class="co">#locate example data</span></span>
+<span><span class="va">wd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu">str_split</span><span class="op">(</span><span class="va">data</span>, <span class="st">"fewsdom_example_data"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="co">#get location of package</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">wd</span>, <span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span> <span class="co">#create example folder (we'll delete at the end)</span></span>
+<span><span class="co">#unlink(paste(wd, "example", sep=""), recursive = T)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">wd</span>, <span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span>  <span class="co">#move example files over</span></span></code></pre></div>
+<p>Check the example folder to ensure you’ve now got files in there, you
+should have 35 items. Lastly, we’ll save this new folder as our project
+path.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prjpath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">wd</span>, <span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="step-3-run-the-function-to-process-the-data">Step 3: Run the function to process the data<a class="anchor" aria-label="anchor" href="#step-3-run-the-function-to-process-the-data"></a>
+</h3>
+<p>I created a single function to do everything for a few reasons, first
+I wanted it to be easy for everyone to use, even those with minimal
+coding experience. I also wanted to ensure the processing steps were
+standardized so all the data is analyzed the same way for comparability.
+Lastly, I was concerned that having a long processing script with
+multiple users would lead to accidental code changes causing the script
+to break. Thus while this package has many more functions that can be
+used to write your own custom processing script, the main function is
+‘run_eems’.</p>
+<p>Ideally the EEM’s samples should be run concurrently with
+measurements of dissolved organic carbon (DOC) so the samples can be
+normalized to this value. It’s also required to calculate some common
+metrics like SUVA 254. That being said, sometimes we run test samples,
+where DOC isn’t required. The main function (run_eems) is built to
+handle both cases, but I’ve laid out sample functions for each. We’ll
+run without DOC data first.</p>
+<div class="section level4">
+<h4 id="metadata">Metadata<a class="anchor" aria-label="anchor" href="#metadata"></a>
+</h4>
+<p>Before we get into the function let’s load the metadata first so you
+can see what it should look like. There is a template in the package
+named “metadata_example, let’s load it and have a look at the
+formatting. You cannot run samples unless you have correctly formatted
+metadata. If you’re getting error messages, make sure your metadata
+looks correct.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">prjpath</span>, <span class="st">"metadata_example.xlsx"</span><span class="op">)</span><span class="op">)</span>  <span class="co">#load example data</span></span>
+<span><span class="va">metadata</span> </span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 7 × 11</span></span></span>
+<span><span class="co">##   index analysis_date       description  data_…¹ repli…² integ…³ dilut…⁴ RSU_a…⁵</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>     1 2022-11-14 <span style="color: #949494;">00:00:00</span> Sample Blan… BLK221…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>     2 2022-11-14 <span style="color: #949494;">00:00:00</span> PreTea 1% S… preTea…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>     3 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN092      MCSN09…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>     4 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN094      MCSN09…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>     5 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN098      MCSN09…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>     6 2022-11-14 <span style="color: #949494;">00:00:00</span> PostTea 1% … postTe…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span>     7 2022-11-14 <span style="color: #949494;">00:00:00</span> Sample Blan… BLK221…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
+<span><span class="co">## <span style="color: #949494;"># … with 3 more variables: run_type &lt;chr&gt;, DOC_mg_L &lt;lgl&gt;, Notes &lt;lgl&gt;, and</span></span></span>
+<span><span class="co">## <span style="color: #949494;">#   abbreviated variable names ¹​data_identifier, ²​replicate_no,</span></span></span>
+<span><span class="co">## <span style="color: #949494;">#   ³​integration_time_s, ⁴​dilution, ⁵​RSU_area_1s</span></span></span></code></pre>
+<p>For more explanation of what goes into each column pull up a help
+file describing each column.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/help.html" class="external-link">help</a></span><span class="op">(</span><span class="va">meta</span><span class="op">)</span> </span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="process-without-doc-data">Process without DOC data<a class="anchor" aria-label="anchor" href="#process-without-doc-data"></a>
+</h4>
+<p>In this function the only things that need to be specified are the
+location of the data (prjpath) which we’ve already set, the metadata
+name (meta_name) which will be used to find the metadata in the folder,
+and if we should look for DOC data (get_doc) in this example this should
+be false.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_eems.html">run_eems</a></span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span>, meta_name <span class="op">=</span> <span class="st">"metadata_example.xlsx"</span>,</span>
+<span>             get_doc <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Renaming files and putting in files </span></span>
+<span><span class="co">## Loading data in R </span></span>
+<span><span class="co">## Processing EEMs and absorbance data </span></span>
+<span><span class="co">## Reporting EEMs and absorbance data</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in plot_eems(prjpath = prjpath, meta = meta, eem = X_clean, doc_norm =</span></span>
+<span><span class="co">## F): Metadata didn't contain any DOC data, unable to create DOC normalized</span></span>
+<span><span class="co">## plots.</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in get_indices(X_clean, abs_clean, meta, prjpath = prjpath, doc_norm =</span></span>
+<span><span class="co">## "both", : No DOC data was provided, DOC normalized fluorescence metrics were</span></span>
+<span><span class="co">## not calculated</span></span></code></pre>
+<pre><code><span><span class="co">## Warning in get_indices(X_clean, abs_clean, meta, prjpath = prjpath, doc_norm =</span></span>
+<span><span class="co">## "both", : No DOC data was provided, absorbance metrics were not calculated</span></span></code></pre>
+<pre><code><span><span class="co">##  </span></span>
+<span><span class="co">##  EEM's have been successfully processed. Look in the 5_Processed folder for plots and indices</span></span></code></pre>
+<p>Here we see that we get a warning that because we don’t have DOC
+normalized data, we can’t get those plots, this is because the code
+tries to provide both.</p>
+<p>All the code outputs will be located in the folder named
+‘5_Processed’. We can look at what’s in the processed folder now.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">prjpath</span>, <span class="st">"5_Processed"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "BLK2211141_1_5s.csv"          "BLK2211142_1_5s.csv"         </span></span>
+<span><span class="co">##  [3] "Figures"                      "MCSN0922211011340_1_5s.csv"  </span></span>
+<span><span class="co">##  [5] "MCSN0942211010937_1_5s.csv"   "MCSN0982211011046_1_5s.csv"  </span></span>
+<span><span class="co">##  [7] "metadata.rds"                 "postTea221114_1_5s.csv"      </span></span>
+<span><span class="co">##  [9] "preTea221114_1_5s.csv"        "processed_absdata.rds"       </span></span>
+<span><span class="co">## [11] "Processed_Absorbance.csv"     "processed_eemlist.rds"       </span></span>
+<span><span class="co">## [13] "processing_tracking.txt"      "SpectralIndices_example.xlsx"</span></span></code></pre>
+<p>It will save each processed EEM’s as a .csv file, it will also save
+the processed EEMs, absorbance data, and metadata as R data files
+(.rds). It calculates and reports some standard spectral indices and
+provides a text file showing the processing steps performed on the data.
+Lastly there’s a file named Figures, that contains the plots.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">prjpath</span>, <span class="st">"5_Processed/Figures"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<pre><code><span><span class="co">## [1] "BLK2211141_1_5s.png"        "BLK2211142_1_5s.png"       </span></span>
+<span><span class="co">## [3] "EEM_summary_plot.png"       "MCSN0922211011340_1_5s.png"</span></span>
+<span><span class="co">## [5] "MCSN0942211010937_1_5s.png" "MCSN0982211011046_1_5s.png"</span></span>
+<span><span class="co">## [7] "postTea221114_1_5s.png"     "preTea221114_1_5s.png"</span></span></code></pre>
+<div class="figure">
+<img src="../../../_temp/Library/fewsdom/example/5_Processed/Figures/EEM_summary_plot.png" alt="The summary plot  from the example" width="100%"><p class="caption">
+The summary plot from the example
+</p>
+</div>
+<p>Later we’ll have a look at the what’s going on in the script, but for
+now, lets move on and analyze the samples with DOC this time.</p>
+</div>
+<div class="section level4">
+<h4 id="process-without-doc-data-1">Process without DOC data<a class="anchor" aria-label="anchor" href="#process-without-doc-data-1"></a>
+</h4>
+<p>The main difference between running the ‘run_eems’ function with and
+without DOC data is that if you set ‘get_doc’ to TRUE you need to
+provide a spreadsheet with those DOC values and sites, and the code will
+match the samples in your metadata to those sites and add the
+concentrations to you metadata. Because of this there’s a few more
+things that need to be specified in the function.</p>
+<p>First we need to specify the doc file (doc_file). This can be either
+an excel file or csv file. If it’s a excel file though, the sheet name
+must be specified (doc_sheet). Additionally you must tell the code which
+column has the DOC data (doc_column) and the site name (name_column). If
+there’s lines that need be skipped at the beginning that can be done
+with ‘nskip’.</p>
+<p>Lastly there are two arguments that help the code match up the sites
+between the DOC data and the metadata. Sample names are often given as a
+site name followed by the date and time of collection, the ‘doc_delin’
+argument allows you to set the symbol that’s separating the site name
+and the other sampling information in the DOC data. Lastly, you must do
+the same for the sample names in the metadata. However, due to the
+software, the sample names cannot contain underscores thus we must
+specify the start and end of the sample names. This is used to extract
+just the site name without any date or time identifiers so you can more
+easily merge data and compare. The values you specify are used in a
+str_sub function similar to this:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">site_loc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">7</span><span class="op">)</span></span>
+<span><span class="va">site</span> <span class="op">&lt;-</span> <span class="st">"MCSN012202301011214"</span> <span class="co">#site name (MCSN012) with the date and time it was collected</span></span>
+<span><span class="op">(</span><span class="va">site_clean</span> <span class="op">&lt;-</span> <span class="fu">str_sub</span><span class="op">(</span><span class="va">site</span>, <span class="va">site_loc</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">site_loc</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "MCSN012"</span></span></code></pre>
+<p>So the first number here is the location in the string where your
+site name starts, the second number is where the site name ends. If we
+look at the metadata, we can see we should be using c(1,7)</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">str_sub</span><span class="op">(</span><span class="va">meta</span><span class="op">$</span><span class="va">data_identifier</span>, <span class="va">site_loc</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">site_loc</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "BLK2211" "preTea2" "MCSN092" "MCSN094" "MCSN098" "postTea" "BLK2211"</span></span>
+<span><span class="co">## [8] "preTea2"</span></span></code></pre>
+<p>You can see that the blanks and tea standards get a little cut off,
+that’s okay as these samples don’t have DOC data to match to
+anyways.</p>
+<p>Now that we understand the extra parameters a little better, let’s
+analyze our EEM’s with the DOC data. The code is built to overwrite
+previous processing, so we don’t need a fresh example folder, it will
+just recogize that the files have already been organized and load them
+in to process.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#analyze EEM's data</span></span>
+<span><span class="fu"><a href="../reference/run_eems.html">run_eems</a></span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span>, meta_name <span class="op">=</span> <span class="st">"metadata_example.xlsx"</span>,</span>
+<span>             doc_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">prjpath</span>, <span class="st">"example_DOC_data.xlsx"</span><span class="op">)</span>,</span>
+<span>             doc_sheet<span class="op">=</span><span class="st">"MCKI Data"</span>, doc_column<span class="op">=</span><span class="fl">7</span>, name_column <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>             nskip<span class="op">=</span><span class="fl">1</span>, doc_delim<span class="op">=</span><span class="st">"-"</span>, site_loc<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Linked 3/7 samples with DOC data</span></span>
+<span><span class="co">## Renaming files and putting in files </span></span>
+<span><span class="co">## Loading data in R </span></span>
+<span><span class="co">## Processing EEMs and absorbance data </span></span>
+<span><span class="co">## Reporting EEMs and absorbance data</span></span></code></pre>
+<pre><code><span><span class="co">##  </span></span>
+<span><span class="co">##  EEM's have been successfully processed. Look in the 5_Processed folder for plots and indices</span></span></code></pre>
+<p>Notice this time it says that it was able to link 3 out of the 7
+samples with DOC data and did not give any errors about plotting DOC.
+Have a look at the processed folder now. The main differences you should
+notice is that the spectral indices file now includes DOC normalized
+metrics for the samples with DOC data, it also contains absorbance data
+now. Lastly, we now have DOC normalized plots.</p>
+<div class="figure">
+<img src="../../../_temp/Library/fewsdom/example/5_Processed/Figures/EEM_summary_plot_DOC.png" alt="The summary plot  from the example" width="100%"><p class="caption">
+The summary plot from the example
+</p>
+</div>
+<p>Notice that there’s only 3, because we only have three sample with
+DOC data.</p>
+<p>And that’s it, you now know the basics to take raw EEM’s data and
+process it! If you want to know more about the functions within the
+run_eems function, have a look at the ‘under-the-hood’ vingette.</p>
+</div>
+</div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
