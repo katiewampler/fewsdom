@@ -29,7 +29,8 @@ Imports:
 	eemR, 
 	gridExtra,
 	reader, 
-	displease
+	displease, 
+	readxl
 Remotes: 
   github::coolbutuseless/displease
 RoxygenNote: 7.2.3

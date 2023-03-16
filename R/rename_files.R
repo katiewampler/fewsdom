@@ -104,7 +104,8 @@ files_rename <- function(meta, prjpath){
 #' it renames the files to the sample identifier and creates folder for each
 #' file type in the main file directory.
 #'
-#' @importFrom stringr str_detect
+#' @importFrom tools file_ext
+#' @importFrom readxl read_excel
 #'
 #' @param prjpath the file path of the main file directory where data is located
 #' @param meta_file file location of metadata table, used to determine how samples were run
@@ -120,12 +121,12 @@ files_rename <- function(meta, prjpath){
 #' }
 #'
 
-clean_files <- function(prjpath, meta_file, meta_sheet=NULL, ...){
+clean_files <- function(prjpath, meta_file, meta_sheet="log", ...){
   stopifnot(is.character(c(prjpath, meta_file))| file.exists(prjpath))
 
   #Load Sample Log
-  if(stringr::str_detect(meta_file, ".xlsx")){
-    meta <- openxlsx::readWorkbook(xlsxFile=meta_file, sheet=meta_sheet, detectDates = T)
+  if(tools::file_ext(meta_file) == "xlsx"){
+    meta <- readxl::read_excel(path=meta_file, sheet=meta_sheet)
   } else{
     meta <- read.csv(meta_file)
   }

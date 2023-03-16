@@ -8,15 +8,11 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 ```{r setup, include=F}
-library(fewsdom) 
-
 #load packages to run example 
 library(stringr)
 library(readxl)
@@ -107,7 +103,7 @@ It will save each processed EEM's as a .csv file, it will also save the processe
 ```{r}
 list.files(file.path(prjpath, "5_Processed/Figures")) 
 ```
-```{r pressure, echo=FALSE, fig.cap="The summary plot  from the example", out.width = '100%'}
+```{r, echo=FALSE, fig.cap="The summary plot  from the example", out.width = '100%', warning=F}
 knitr::include_graphics(file.path(prjpath, "5_Processed/Figures/EEM_summary_plot.png"))
 ```
 
@@ -142,7 +138,7 @@ run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx",
 ```
 Notice this time it says that it was able to link 3 out of the 7 samples with DOC data and did not give any errors about plotting DOC. Have a look at the processed folder now. The main differences you should notice is that the spectral indices file now includes DOC normalized metrics for the samples with DOC data, it also contains absorbance data now. Lastly, we now have DOC normalized plots. 
 
-```{r pressure, echo=FALSE, fig.cap="The summary plot  from the example", out.width = '100%'}
+```{r, echo=FALSE, fig.cap="The summary plot  from the example", out.width = '100%', warning=F}
 knitr::include_graphics(file.path(prjpath, "5_Processed/Figures/EEM_summary_plot_DOC.png"))
 ```
 Notice that there's only 3, because we only have three sample with DOC data. 

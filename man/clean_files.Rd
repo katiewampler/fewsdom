@@ -4,7 +4,7 @@
 \alias{clean_files}
 \title{Renames and organizes files from default Aqualog files}
 \usage{
-clean_files(prjpath, meta_file, meta_sheet = NULL, ...)
+clean_files(prjpath, meta_file, meta_sheet = "log", ...)
 }
 \arguments{
 \item{prjpath}{the file path of the main file directory where data is located}
