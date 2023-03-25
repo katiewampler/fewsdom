@@ -163,18 +163,17 @@ looks correct.</p>
 <code class="sourceCode R"><span><span class="va">metadata</span> <span class="op">&lt;-</span> <span class="fu">read_xlsx</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">prjpath</span>, <span class="st">"metadata_example.xlsx"</span><span class="op">)</span><span class="op">)</span>  <span class="co">#load example data</span></span>
 <span><span class="va">metadata</span> </span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 7 × 11</span></span></span>
-<span><span class="co">##   index analysis_date       description  data_…¹ repli…² integ…³ dilut…⁴ RSU_a…⁵</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>     1 2022-11-14 <span style="color: #949494;">00:00:00</span> Sample Blan… BLK221…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span>     2 2022-11-14 <span style="color: #949494;">00:00:00</span> PreTea 1% S… preTea…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span>     3 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN092      MCSN09…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span>     4 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN094      MCSN09…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span>     5 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN098      MCSN09…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span>     6 2022-11-14 <span style="color: #949494;">00:00:00</span> PostTea 1% … postTe…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">7</span>     7 2022-11-14 <span style="color: #949494;">00:00:00</span> Sample Blan… BLK221…       1       5       1   <span style="text-decoration: underline;">1</span>460.</span></span>
-<span><span class="co">## <span style="color: #949494;"># … with 3 more variables: run_type &lt;chr&gt;, DOC_mg_L &lt;lgl&gt;, Notes &lt;lgl&gt;, and</span></span></span>
-<span><span class="co">## <span style="color: #949494;">#   abbreviated variable names ¹​data_identifier, ²​replicate_no,</span></span></span>
-<span><span class="co">## <span style="color: #949494;">#   ³​integration_time_s, ⁴​dilution, ⁵​RSU_area_1s</span></span></span></code></pre>
+<span><span class="co">##   index analysis_date       description    data_identifier   replicate_no</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>     1 2022-11-14 <span style="color: #949494;">00:00:00</span> Sample Blank 1 BLK2211141                   1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>     2 2022-11-14 <span style="color: #949494;">00:00:00</span> PreTea 1% SRM  preTea221114                 1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>     3 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN092        MCSN0922211011340            1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>     4 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN094        MCSN0942211010937            1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>     5 2022-11-14 <span style="color: #949494;">00:00:00</span> MCSN098        MCSN0982211011046            1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>     6 2022-11-14 <span style="color: #949494;">00:00:00</span> PostTea 1% SRM postTea221114                1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">7</span>     7 2022-11-14 <span style="color: #949494;">00:00:00</span> Sample Blank 2 BLK2211142                   1</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 6 more variables: integration_time_s &lt;dbl&gt;, dilution &lt;dbl&gt;,</span></span></span>
+<span><span class="co">## <span style="color: #949494;">#   RSU_area_1s &lt;dbl&gt;, run_type &lt;chr&gt;, DOC_mg_L &lt;lgl&gt;, Notes &lt;lgl&gt;</span></span></span></code></pre>
 <p>For more explanation of what goes into each column pull up a help
 file describing each column.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
