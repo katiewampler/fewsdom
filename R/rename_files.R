@@ -16,7 +16,7 @@ files_rename <- function(meta, prjpath){
   #correct for any blanks not listed as B1
   file_correct <- list.files(prjpath)
   file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
-  correct <- file_correct[!stringr::str_detect(file_correct, "B1")]
+  correct <- file_correct[!stringr::str_detect(file_correct, "B1") & str_sub(file_correct, 1,1) == "B"]
   if(length(correct)> 0){
     correct_names <- stringr::str_sub(correct, start=3)
     correct_names <- paste("B1", correct_names, sep="")
