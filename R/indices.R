@@ -216,7 +216,12 @@ abs_parm <- function(abs_data, waves=NULL, meta,
 #' Fluorescence Index (FI): Ratio of fluorescence at ex = 370 nm, em = 470 nm to em = 520 nm.
 #' Identifies the relative contributions of terrestrial to microbial DOM sources.
 #'
-#' Humification Index (HIX): ex = 254 nm, em =\eqn{\sum}435:480 divided by em =\eqn{\sum}435:480, \eqn{\sum}300:345.
+#' Max Wavelength of FI (FI_max): The location (wavelength) of the maxiumum emission peak
+#' at ex= 370 nm. This is typically around 470 nm for natural materials however recent work
+#' has shown that this can change considerably for pyrogenic organic matter (Egan et al. 2023).
+#'
+#' Humification Index (HIX): ex = 254 nm, em =\eqn{\sum}435:480 divided by em =\eqn{\sum}300:345.
+#' HIX proposed by Zsolnay (2002).
 #' An indication of humic substances or extent of humification. Higher values indicate an higher degree of humification.
 #'
 #' Freshness Index (\eqn{\beta:\alpha}, fresh): ex = 310 nm, ratio of em = 380 nm to max in em = 420:435 nm.
@@ -237,6 +242,7 @@ abs_parm <- function(abs_data, waves=NULL, meta,
 #' @returns Returns a data frame containing fluorescence peaks and indices for each sample
 #' @references Coble, P. G., Lead, J., Baker, A., Reynolds, D. M., & Spencer, R. G. M. (Eds.). (2014). Aquatic Organic Matter Fluorescence. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9781139045452
 #' @references Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing, B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved organic matter (DOM): Effects of biological and photolytic degradation. Limnology and Oceanography, 61(3), 1015–1032. https://doi.org/10.1002/lno.10270
+#' @references Egan, J. K., McKnight, D. M., Bowman, M. M., SanClements, M. D., Gallo, A. C., Hatten, J. A., & Matosziuk, L. M. (2023). Identifying photochemical alterations of dissolved pyrogenic organic matter using fluorescence spectroscopy. Aquatic Sciences, 85(2), 38. https://doi.org/10.1007/s00027-022-00919-7
 #' @export
 #'
 eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
@@ -283,7 +289,7 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   #list peaks
   coble_em_peak <- list(pB=300:320, pT=320:350, pA=380:480, pM=380:420,
                         pC=420:480, pD=509, pE=521, pN=370, FI=c(470,520),
-                        HIX=c(435:480,300:345), fresh=c(380, 420:435),
+                        HIX=c(300:345), fresh=c(380, 420:435),
                         RFE=460, BIX=c(380, 430))
 
   coble_ex_peak <- list(pB=270:280, pT=270:280, pA=250:260, pM=310:320,
@@ -330,8 +336,13 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   fluo_520 <- pracma::interp2(eem$ex, eem$em, eem$x, 370, 520)
   if(fluo_470 >= noise_val & fluo_520 >= noise_val){
     FI <- fluo_470/fluo_520
+    #get peak FI
+    fluo_370 <- pracma::interp2(eem$ex, eem$em, eem$x, rep(370, 351), 248:598)
+    FI_data <- data.frame(em=248:598, intensity=fluo_370)
+    FI_max <- as.numeric(na.omit(FI_data$em[FI_data$intensity == max(FI_data$intensity, na.rm=T)]))
   } else{
     FI <- NA
+    FI_max <- NA
   }
 
   #humification index
@@ -339,14 +350,13 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   em_300_345 <- seq(from = 300, to = 345, by = 1)
   ex_254 <- rep(254, length(em_300_345))
   sum_em_435_480 <- sum(pracma::interp2(eem$ex, eem$em, eem$x,
-                                        ex_254, em_435_480))
+                                            ex_254, em_435_480))
   sum_em_300_345 <- sum(pracma::interp2(eem$ex, eem$em, eem$x,
-                                        ex_254, em_300_345))
+                                            ex_254, em_300_345))
 
   if(sum_em_435_480 >= noise_val & sum_em_300_345 >= noise_val){
-    HIX <- sum_em_435_480/(sum_em_300_345 + sum_em_435_480)
+     HIX <- sum_em_435_480/(sum_em_300_345)
   } else{HIX <- NA}
-
 
   #fresh
   fluo_380 <- pracma::interp2(eem$ex, eem$em, eem$x, 310, 380)
@@ -369,7 +379,7 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
 
   output <- data.frame(sample = eem$sample, pB=pB, pT=pT, pA=pA, pM=pM,
                        pC=pC, pD=pD, pE=pE, pN=pN, rAT=rAT, rCA=rCA,
-                       rCM=rCM, rCT=rCT, FI=FI, HIX=HIX, fresh=fresh,
+                       rCM=rCM, rCT=rCT, FI=FI, FI_max = FI_max, HIX=HIX, fresh=fresh,
                        RFE=RFE, BIX=BIX, stringsAsFactors = FALSE)
 
   #clean a little
@@ -449,7 +459,7 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
 
   #get absorbance data
     abs_df <- abs_parm(abs_data, meta=meta,
-                       r_thresh=0.8, keep_all=F, waves=waves)
+                       r_thresh=0.8, keep_all=F, waves=c(254, waves))
 
     if(sampsascol == T){abs_df <- clean_transpose(abs_df)}
     if(nrow(abs_df) > 0){

@@ -110,7 +110,7 @@ knitr::include_graphics(file.path(prjpath, "5_Processed/Figures/EEM_summary_plot
 Later we'll have a look at the what's going on in the script, but for now, lets move on and analyze the samples with DOC this time. 
 
 
-### Process without DOC data
+### Process with DOC data
 The main difference between running the 'run_eems' function with and without DOC data is that if you set 'get_doc' to TRUE you need to provide a spreadsheet with those DOC values and sites, and the code will match the samples in your metadata to those sites and add the concentrations to you metadata. Because of this there's a few more things that need to be specified in the function. 
 
 First we need to specify the doc file (doc_file). This can be either an excel file or csv file. If it's a excel file though, the sheet name must be specified (doc_sheet). Additionally you must tell the code which column has the DOC data (doc_column) and the site name (name_column). If there's lines that need be skipped at the beginning that can be done with 'nskip'. 
