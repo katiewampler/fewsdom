@@ -90,7 +90,7 @@ abs_parm <- function(abs_data, waves=NULL, meta,
   #extract data for added absorbance wavelengths
   for(x in waves){
     row_num <- which(data$wavelength == x) #row in absorbance data
-    col_num <- which(stringr::str_detect(colnames(abs_out), as.character(x))==T) #location in output table
+    col_num <- which(stringr::str_detect(colnames(abs_out), paste("a",as.character(x), sep=""))==T) #location in output table
     abs_out[,col_num] <- as.numeric(data[row_num, 1:(ncol(data)-1)]) #put data in column
   }
 
