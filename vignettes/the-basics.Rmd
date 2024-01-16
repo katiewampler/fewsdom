@@ -32,6 +32,7 @@ The 'fewsdom' package is currently only available on github, there is a hope to 
 ```{r echo=TRUE, warning=F, message=F, eval=F}
 library(devtools)
 install_github("katiewampler/fewsdom")
+
 ``` 
 
 You will also want to install Rtools (https://cran.r-project.org/bin/windows/Rtools/) if you have not already. If you have already done both of these things before, then you'll just need to load the library. 

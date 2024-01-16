@@ -136,6 +136,47 @@ clean_files <- function(prjpath, meta_file, meta_sheet="log", ...){
             "replicate_no" %in% colnames(meta), "integration_time_s" %in% colnames(meta),
             "run_type" %in% colnames(meta))
 
+  #check for numbers in the blanks
+  num_blanks <- which(stringr::str_detect(meta$data_identifier, "#")==T) #finds blanks with # sign
+  #rename files and metadata
+  if(length(num_blanks) > 1){
+    for(x in num_blanks){
+      files <- paste("B1S", meta$index[x], meta$data_identifier[x], c(".ogw","ABS.dat","SEM.dat","BEM.dat"),sep="")
+      new_files <- stringr::str_remove_all(files, "#")
+      file.rename(from=paste(prjpath, files, sep="/"), to=paste(prjpath, new_files, sep="/"))
+      meta$data_identifier[x] <- stringr::str_remove_all(meta$data_identifier[x], "#")
+    }
+  }
+
+  #check for - in the sample names
+  num_dash <- which(stringr::str_detect(meta$data_identifier, "-")==T) #finds blanks with # sign
+  if(length(num_dash) >0){
+    #rename files and metadata
+    for(x in num_dash){
+      files <- paste("B1S", meta$index[x], meta$data_identifier[x], c(".ogw","ABS.dat","SEM.dat","BEM.dat"),sep="")
+      new_files <- stringr::str_remove_all(files, "-")
+      file.rename(from=paste(prjpath, files, sep="/"), to=paste(prjpath, new_files, sep="/"))
+      meta$data_identifier[x] <- stringr::str_remove_all(meta$data_identifier[x], "-")
+    }
+  }
+
+  if((length(num_blanks) + length(num_dash)) > 0){
+    #write meta again, with files renamed to remove errors
+    if(stringr::str_detect(meta_file, ".xlsx")){
+      openxlsx::write.xlsx(meta, meta_file, sheetName = meta_sheet,
+                           colNames = TRUE, rowNames = F, append = F)} else{
+                             write.csv(meta, meta_file, col.names = T, row.names = F, quote=F)}
+  }else{
+    if(stringr::str_detect(meta_file, ".xlsx")){
+      new_meta_file <- paste(unlist(str_split(meta_file, ".xlsx"))[1], "_doc_added.xlsx", sep="")
+      openxlsx::write.xlsx(meta, new_meta_file, sheetName = meta_sheet,
+                           colNames = TRUE, rowNames = F, append = F)} else{
+                             new_meta_file <- paste(unlist(str_split(meta_file, ".csv"))[1], "_doc_added.csv", sep="")
+                             write.csv(meta, new_meta_file, col.names = T, row.names = F, quote=F)}
+  }
+  }
+
+
   #check for duplicates that aren't marked as such
   meta_dup <- meta %>% dplyr::filter(replicate_no == 1) %>% dplyr::group_by(data_identifier) %>% dplyr::summarise(count=n())
   dups <- meta_dup$data_identifier[meta_dup$count > 1]
