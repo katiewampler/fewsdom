@@ -161,20 +161,12 @@ clean_files <- function(prjpath, meta_file, meta_sheet="log", ...){
   }
 
   if((length(num_blanks) + length(num_dash)) > 0){
-    #write meta again, with files renamed to remove errors
     if(stringr::str_detect(meta_file, ".xlsx")){
       openxlsx::write.xlsx(meta, meta_file, sheetName = meta_sheet,
                            colNames = TRUE, rowNames = F, append = F)} else{
                              write.csv(meta, meta_file, col.names = T, row.names = F, quote=F)}
-  }else{
-    if(stringr::str_detect(meta_file, ".xlsx")){
-      new_meta_file <- paste(unlist(str_split(meta_file, ".xlsx"))[1], "_doc_added.xlsx", sep="")
-      openxlsx::write.xlsx(meta, new_meta_file, sheetName = meta_sheet,
-                           colNames = TRUE, rowNames = F, append = F)} else{
-                             new_meta_file <- paste(unlist(str_split(meta_file, ".csv"))[1], "_doc_added.csv", sep="")
-                             write.csv(meta, new_meta_file, col.names = T, row.names = F, quote=F)}
   }
-  }
+
 
 
   #check for duplicates that aren't marked as such
