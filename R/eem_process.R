@@ -82,7 +82,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
   X_sub <- lapply(1:length(X_sub), function(n, replace_blank){
     eem <- eemlist[[n]]
     if(replace_blank == T){
-      blank <- eemlist[[which(stringr::str_detect(meta$unique_ID, "BLK|blk|blank|blank|BLANK") == T)[1]]]
+      blank <- eemlist[[which(stringr::str_detect(meta$unique_ID, "BLK|blk|blank|blank|BLANK") == T)[3]]]
     } else{
       blank <- blanklist[[n]]
     }
