@@ -125,7 +125,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     X_ife <- eemR::eem_cut(X_mask, em=600:1000, ex=600:1000, exact=F)
     write.table(paste(Sys.time(), "- EEM's were clipped to just emission wavelengths under 600 nm", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
 
-    X_ife <- eem_inner_filter_effect(X_ife, absorbance=abs)
+    X_ife <- eemR::eem_inner_filter_effect(X_ife, absorbance=abs)
     write.table(paste(Sys.time(), "- EEM's were corrected for inner filter effects", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
     if(length(empty_eems(X_ife, verbose=F)) >0){
       stop("one or more of your EEMs has empty data after correcting for inner filter effects, use 'empty_eems' function to find out which ones")
@@ -163,13 +163,17 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     write.table(paste(Sys.time(), "- Absorbance was corrected for dilutions", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
 
     if(sum(meta$dilution != 1) > 0){
-      dil_data <- 1/meta["dilution"] #invert to match function
-      X_dil_cor <- X_dil_cor %>% eem_dilution(dil_data)
+      dil_data <- meta %>% select(dilution) #invert to match function
+      if(mean(unlist(dil_data), na.rm=T) < 1){dil_data <- 1 / dil_data
+      warning("Inverted dilutions to be dilution factor")}
+
+      X_dil_cor <- X_dil_cor %>% staRdom::eem_dilution(dil_data)
 
       #correct absorbance for dilution
       for(x in 1:nrow(meta)){
         dil_fact <- meta$dilution[x]
-        Sabs_dil_cor[,meta$abs_col[x]] <- abs[,meta$abs_col[x]] / dil_fact}
+        if(dil_fact < 1){dil_fact <- 1 / dil_fact }
+        Sabs_dil_cor[,meta$abs_col[x]] <- abs[,meta$abs_col[x]] * dil_fact}
     }
   }
   if(length(empty_eems(X_dil_cor, verbose=F)) >0){
