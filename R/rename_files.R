@@ -13,19 +13,6 @@
 files_rename <- function(meta, prjpath){
   stopifnot(is.data.frame(meta) | is.character(prjpath) |file.exists(prjpath))
 
-  #correct for any blanks not listed as B1
-  file_correct <- list.files(prjpath)
-  file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
-  correct <- file_correct[!stringr::str_detect(file_correct, "B1") & str_sub(file_correct, 1,1) == "B"]
-  if(length(correct)> 0){
-    correct_names <- stringr::str_sub(correct, start=3)
-    correct_names <- paste("B1", correct_names, sep="")
-    file.rename(from=paste(prjpath, correct, sep="/"), to=paste(prjpath, correct_names, sep="/"))
-    note <- "Warning, multiple blanks were used in the sample Q, the following files were renamed for the code to run:"
-    write.table(note, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F)
-    write.table(correct, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F, append=T)
-  }
-
   #determine which samples were run manually and which were run with the sample Q
   manual_rows <- which(meta$run_type == "manual" | meta$run_type == "Manual")
   sampleq_rows <- which(meta$run_type == "sampleQ" | meta$run_type == "sampleq")
@@ -67,6 +54,18 @@ files_rename <- function(meta, prjpath){
 
   #clean sampleQ samples
   for(f in sampleq_rows){
+    #correct for any blanks not listed as B1
+    file_correct <- list.files(prjpath)
+    file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
+    correct <- file_correct[!stringr::str_detect(file_correct, "B1") & str_sub(file_correct, 1,1) == "B"]
+    if(length(correct)> 0){
+      correct_names <- stringr::str_sub(correct, start=3)
+      correct_names <- paste("B1", correct_names, sep="")
+      file.rename(from=paste(prjpath, correct, sep="/"), to=paste(prjpath, correct_names, sep="/"))
+      note <- "Warning, multiple blanks were used in the sample Q, the following files were renamed for the code to run:"
+      write.table(note, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F)
+      write.table(correct, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F, append=T)
+    }
     #write names of raw data
     raw_blank <- paste("B1", "S", meta$index[f], meta$data_identifier[f],"BEM.dat", sep="")
     raw_eem <- paste("B1", "S", meta$index[f], meta$data_identifier[f],"SEM.dat", sep="")
@@ -132,7 +131,13 @@ clean_files <- function(prjpath, meta_file, meta_sheet="log", ...){
   }
 
   #check metadata
-  stopifnot(sum(is.na(meta$RSU_area_1s)) == 0 | "data_identifier" %in% colnames(meta),
+  if(sum(is.na(meta$RSU_area_1s)) > 0){
+    stop("metadata is missing RSU_area_1s, please add and rerun")
+  }
+  if(sum(meta$run_type %in% c("manual","Manual","sampleq","sampleQ","SampleQ","Sampleq"))!= nrow(meta)){
+    stop("run type needs to be either 'manual' or 'sampleQ'. Correct and rerun")
+  }
+  stopifnot("data_identifier" %in% colnames(meta),
             "replicate_no" %in% colnames(meta), "integration_time_s" %in% colnames(meta),
             "run_type" %in% colnames(meta))
 

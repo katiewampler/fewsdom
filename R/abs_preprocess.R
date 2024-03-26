@@ -40,21 +40,21 @@ abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
 
       if(runtype == "mixed"){
         samp_runtype <- meta$run_type[which(meta$unique_ID == x)]
-      }else if(runtype == "sampleQ"){
+      }else if(runtype %in% c("sampleQ","sampleq")){
         samp_runtype <- "sampleQ"
-      }else if(runtype == "manual"){
+      }else if(runtype %in% c("manual","Manual")){
         samp_runtype <- "manual"
       }else{
         stop("Unrecognized sample type, please choose 'mixed', 'sampleQ', or 'manual'")
       }
 
       #if run manually it has extra rows that aren't needed
-      if(samp_runtype == "manual"){
+      if(samp_runtype %in% c("manual", "Manual")){
         df <- df[,c(1,10)]
       }
-      if(nrow(df) > 188){
+      if(nrow(df) > 250){
         warning(paste("Your absorbance data",  x, "has too many rows, check if transmittence data got added. Data was clipped to the correct rows.", sep=" "))
-        df <- df[1:188,]
+        df <- df[1:250,]
         df$V10 <- as.numeric(df$V10)
         df$V1 <- as.numeric(df$V1)
       }

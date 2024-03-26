@@ -19,7 +19,6 @@ eem_proccess(
   dilute = T,
   ex_clip = c(247, 450),
   em_clip = c(247, 600),
-  doc_norm = T,
   raman_width = "auto",
   raman_mask = c(8, 8, 1.5, 1.5),
   rayleigh_width = "auto",
@@ -55,8 +54,6 @@ eem_proccess(
 \item{ex_clip}{vector of length two with the excitation wavelengths to clip the EEMs to}
 
 \item{em_clip}{vector of length two with the emission wavelengths to clip the EEMs to}
-
-\item{doc_norm}{logical, if TRUE will normalize any EEMs with DOC data to 1 mg/L carbon}
 
 \item{raman_width}{either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function}
 

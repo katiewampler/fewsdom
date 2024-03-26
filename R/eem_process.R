@@ -20,7 +20,6 @@
 #' @param dilute logical, if TRUE will correct for dilution factors given in metadata table
 #' @param ex_clip vector of length two with the excitation wavelengths to clip the EEMs to
 #' @param em_clip vector of length two with the emission wavelengths to clip the EEMs to
-#' @param doc_norm logical, if TRUE will normalize any EEMs with DOC data to 1 mg/L carbon
 #' @param raman_mask a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified
 #' @param raman_width either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function
 #' @param rayleigh_mask optional if auto width method is used, a vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line
@@ -42,7 +41,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          meta, process_file=T, replace_blank=F,
                          raman=T, rayleigh=T, IFE=T, raman_norm=T,
                          dilute = T, ex_clip = c(247,450),
-                         em_clip = c(247,600), doc_norm=T,
+                         em_clip = c(247,600),
                          raman_width ="auto", raman_mask= c(8,8,1.5,1.5),
                          rayleigh_width="auto", rayleigh_mask = c(20,10,10,10),
                          ...){
@@ -180,7 +179,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     stop("one or more of your EEMs has empty data after correcting for dilutions, use 'empty_eems' function to find out which ones")
   }
 
-  #normalize for DOC
+  #normalize for DOC  ## currently doesn't do anything
   X_DOC <- X_dil_cor
   if(doc_norm == T){
     #note eems with no DOC or value of 0
@@ -201,13 +200,12 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     if(length(empty_eems(X_DOC, verbose=F)) >0){
       stop("one or more of your EEMs has empty data after DOC normalization, use 'empty_eems' function to find out which ones")
     }
-   write.table(paste(Sys.time(), "- EEM's were normalized by DOC concentration", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
   }
 
-  #clip DOC normalized EEM's
+  #clip DOC normalized EEM's  #clips un-normalized eem
   X_DOC_clip <- X_dil_cor
   X_DOC_clip<- eem_cut2(X_DOC_clip, ex=ex_clip, em=em_clip, exact=F)
-  write.table(paste(Sys.time(), "- DOC Normalized EEM's were clipped to Excitation:",ex_clip[1]," to ", ex_clip[2],
+  write.table(paste(Sys.time(), "- EEM's were clipped to Excitation:",ex_clip[1]," to ", ex_clip[2],
                     " nm and Emission:",em_clip[1]," to ", em_clip[2], " nm", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
   if(length(empty_eems(X_DOC_clip, verbose=F)) >0){
     stop("one or more of your EEMs has empty data after clipping, use 'empty_eems' function to find out which ones")

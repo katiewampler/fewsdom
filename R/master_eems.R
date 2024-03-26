@@ -86,7 +86,7 @@ run_eems <- function(prjpath, meta_name, get_doc=T, doc_file, doc_sheet,
   cat("Processing EEMs and absorbance data \n")
   data_process <- eem_proccess(prjpath=prjpath, eemlist=X, blanklist=X_blk, abs=Sabs,
                                process_file=process_file, meta=meta,...)
-  X_clean <- data_process[[1]]
+  X_clean <- data_process[[1]]  #returns non doc normalized data
   abs_clean <- data_process[[2]]
 
   ## Report the Data
