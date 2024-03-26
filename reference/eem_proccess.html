@@ -25,12 +25,6 @@ dilution correction, removing inner filtering effects, raman normalization."><!-
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/the-basics.html">the-basics</a>
-  </div>
-</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -169,9 +163,9 @@ If a process file is given, a file will be created in the processes folder of th
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="va">data_process</span> <span class="op">&lt;-</span> <span class="fu">eem_proccess</span><span class="op">(</span>prjpath<span class="op">=</span><span class="va">prjpath</span>, eemlist<span class="op">=</span><span class="va">X</span>, blanklist<span class="op">=</span><span class="va">X_blk</span>, abs<span class="op">=</span><span class="va">Sabs</span>,</span></span>
 <span class="r-in"><span>process_file<span class="op">=</span><span class="va">process_file</span>, meta<span class="op">=</span><span class="va">meta</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">X_clean</span> <span class="op">&lt;-</span> <span class="va">data_process</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">abs_clean</span> <span class="op">&lt;-</span> <span class="va">data_process</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">abs_clean</span> <span class="op">&lt;-</span> <span class="va">data_process</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
