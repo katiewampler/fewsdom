@@ -1,7 +1,7 @@
 Package: fewsdom
 Type: Package
 Title: Tools to Process Data from Horiba Aqualog
-Version: 0.1.0
+Version: 1.1.1
 Authors@R: person("Katie A.", "Wampler", email = "katie.wampler@oregonstate.edu",
   role = c("aut", "cre"))
 Description: Collection of functions used to process raw data collected 
