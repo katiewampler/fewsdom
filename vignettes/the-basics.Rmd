@@ -9,6 +9,7 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(mc.cores=2)
 
 ```
 
@@ -89,8 +90,7 @@ help(meta)
 In this function the only things that need to be specified are the location of the data (prjpath) which we've already set, the metadata name (meta_name) which will be used to find the metadata in the folder, and if we should look for DOC data (get_doc) in this example this should be false.
 
 ```{r}
-run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx",
-             get_doc = F)
+run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx")
 ```
 Here we see that we get a warning that because we don't have DOC normalized data, we can't get those plots, this is because the code tries to provide both. 
 
@@ -132,7 +132,7 @@ Now that we understand the extra parameters a little better, let's analyze our E
 
 ```{r}
 #analyze EEM's data
-run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx",
+run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx",get_doc=T,
              doc_file = file.path(prjpath, "example_DOC_data.xlsx"),
              doc_sheet="MCKI Data", doc_column=7, name_column = 4,
              nskip=1, doc_delim="-", site_loc=c(1,7))

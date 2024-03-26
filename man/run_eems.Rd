@@ -8,7 +8,7 @@ Combines all the 'fewsdom' functions to make one function to process samples.}
 run_eems(
   prjpath,
   meta_name,
-  get_doc = T,
+  get_doc = F,
   doc_file,
   doc_sheet,
   doc_column = 7,

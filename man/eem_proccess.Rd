@@ -21,7 +21,7 @@ eem_proccess(
   em_clip = c(247, 600),
   raman_width = "auto",
   raman_mask = c(8, 8, 1.5, 1.5),
-  rayleigh_width = "auto",
+  rayleigh_width = "manual",
   rayleigh_mask = c(20, 10, 10, 10),
   ...
 )

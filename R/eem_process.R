@@ -45,7 +45,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          raman_width ="auto", raman_mask= c(8,8,1.5,1.5),
                          rayleigh_width="manual", rayleigh_mask = c(20,10,10,10),
                          ...){
-
+  dilution <- NULL
   stopifnot(is.character(prjpath) | .is_eemlist(eemlist) | .is_eem(eemlist) |
               .is_eemlist(blanklist) | .is_eem(blanklist)| is.data.frame(abs)|
               is.logical(process_file)| is.logical(replace_blank)|is.logical(raman)|

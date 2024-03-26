@@ -53,19 +53,20 @@ files_rename <- function(meta, prjpath){
   }
 
   #clean sampleQ samples
+  #correct for any blanks not listed as B1
+  file_correct <- list.files(prjpath)
+  file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
+  correct <- grep('^B[2-9]S[1-9]', file_correct)
+  if(length(correct)> 0){
+    correct_names <- stringr::str_sub(correct, start=3)
+    correct_names <- paste("B1", correct_names, sep="")
+    file.rename(from=paste(prjpath, correct, sep="/"), to=paste(prjpath, correct_names, sep="/"))
+    note <- "Warning, multiple blanks were used in the sample Q, the following files were renamed for the code to run:"
+    write.table(note, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F)
+    write.table(correct, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F, append=T)
+  }
+
   for(f in sampleq_rows){
-    #correct for any blanks not listed as B1
-    file_correct <- list.files(prjpath)
-    file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
-    correct <- file_correct[!stringr::str_detect(file_correct, "B1") & str_sub(file_correct, 1,1) == "B"]
-    if(length(correct)> 0){
-      correct_names <- stringr::str_sub(correct, start=3)
-      correct_names <- paste("B1", correct_names, sep="")
-      file.rename(from=paste(prjpath, correct, sep="/"), to=paste(prjpath, correct_names, sep="/"))
-      note <- "Warning, multiple blanks were used in the sample Q, the following files were renamed for the code to run:"
-      write.table(note, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F)
-      write.table(correct, paste(prjpath, "/READ_ME.txt", sep=""), row.names=F, quote=F, col.names = F, append=T)
-    }
     #write names of raw data
     raw_blank <- paste("B1", "S", meta$index[f], meta$data_identifier[f],"BEM.dat", sep="")
     raw_eem <- paste("B1", "S", meta$index[f], meta$data_identifier[f],"SEM.dat", sep="")
