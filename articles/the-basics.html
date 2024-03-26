@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fewsdom</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -188,39 +188,10 @@ name (meta_name) which will be used to find the metadata in the folder,
 and if we should look for DOC data (get_doc) in this example this should
 be false.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_eems.html">run_eems</a></span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span>, meta_name <span class="op">=</span> <span class="st">"metadata_example.xlsx"</span>,</span>
-<span>             get_doc <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_eems.html">run_eems</a></span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span>, meta_name <span class="op">=</span> <span class="st">"metadata_example.xlsx"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Renaming files and putting in files </span></span>
 <span><span class="co">## Loading data in R </span></span>
 <span><span class="co">## Processing EEMs and absorbance data </span></span>
-<span><span class="co">## BLK2211141_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 0.9992 1.0018 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : -7e-04 0.0016 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## BLK2211142_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 0.9982 1.0048 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : -0.0016 0.0042 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## MCSN0922211011340_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0004 1.237 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 3e-04 0.1848 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## MCSN0942211010937_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0003 1.2121 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 3e-04 0.1671 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## MCSN0982211011046_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0008 1.3371 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 7e-04 0.2523 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## postTea221114_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0021 1.5325 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 0.0018 0.3708 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## preTea221114_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0025 1.5228 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 0.0022 0.3653 </span></span>
-<span><span class="co">## </span></span>
 <span><span class="co">## Reporting EEMs and absorbance data</span></span></code></pre>
 <pre><code><span><span class="co">## Warning in plot_eems(prjpath = prjpath, meta = meta, eem = X_clean, doc_norm =</span></span>
 <span><span class="co">## F): Metadata didn't contain any DOC data, unable to create DOC normalized</span></span>
@@ -313,7 +284,7 @@ just recogize that the files have already been organized and load them
 in to process.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#analyze EEM's data</span></span>
-<span><span class="fu"><a href="../reference/run_eems.html">run_eems</a></span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span>, meta_name <span class="op">=</span> <span class="st">"metadata_example.xlsx"</span>,</span>
+<span><span class="fu"><a href="../reference/run_eems.html">run_eems</a></span><span class="op">(</span>prjpath <span class="op">=</span> <span class="va">prjpath</span>, meta_name <span class="op">=</span> <span class="st">"metadata_example.xlsx"</span>,get_doc<span class="op">=</span><span class="cn">T</span>,</span>
 <span>             doc_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">prjpath</span>, <span class="st">"example_DOC_data.xlsx"</span><span class="op">)</span>,</span>
 <span>             doc_sheet<span class="op">=</span><span class="st">"MCKI Data"</span>, doc_column<span class="op">=</span><span class="fl">7</span>, name_column <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>             nskip<span class="op">=</span><span class="fl">1</span>, doc_delim<span class="op">=</span><span class="st">"-"</span>, site_loc<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -321,34 +292,6 @@ in to process.</p>
 <span><span class="co">## Renaming files and putting in files </span></span>
 <span><span class="co">## Loading data in R </span></span>
 <span><span class="co">## Processing EEMs and absorbance data </span></span>
-<span><span class="co">## BLK2211141_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 0.9992 1.0018 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : -7e-04 0.0016 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## BLK2211142_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 0.9982 1.0048 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : -0.0016 0.0042 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## MCSN0922211011340_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0004 1.237 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 3e-04 0.1848 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## MCSN0942211010937_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0003 1.2121 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 3e-04 0.1671 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## MCSN0982211011046_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0008 1.3371 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 7e-04 0.2523 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## postTea221114_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0021 1.5325 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 0.0018 0.3708 </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## preTea221114_1_5s </span></span>
-<span><span class="co">## Range of IFE correction factors: 1.0025 1.5228 </span></span>
-<span><span class="co">## Range of total absorbance (Atotal) : 0.0022 0.3653 </span></span>
-<span><span class="co">## </span></span>
 <span><span class="co">## Reporting EEMs and absorbance data</span></span></code></pre>
 <pre><code><span><span class="co">##  </span></span>
 <span><span class="co">##  EEM's have been successfully processed. Look in the 5_Processed folder for plots and indices</span></span></code></pre>
