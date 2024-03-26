@@ -45,7 +45,7 @@
 #'
 #' @export
 #'
-run_eems <- function(prjpath, meta_name, get_doc=T, doc_file, doc_sheet,
+run_eems <- function(prjpath, meta_name, get_doc=F, doc_file, doc_sheet,
                          doc_column=7, name_column=4, nskip=3,
                          doc_delim="-", meta_sheet="log", site_loc=c(1,7),
                           process_file=T, ...){

@@ -43,15 +43,14 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          dilute = T, ex_clip = c(247,450),
                          em_clip = c(247,600),
                          raman_width ="auto", raman_mask= c(8,8,1.5,1.5),
-                         rayleigh_width="auto", rayleigh_mask = c(20,10,10,10),
+                         rayleigh_width="manual", rayleigh_mask = c(20,10,10,10),
                          ...){
 
   stopifnot(is.character(prjpath) | .is_eemlist(eemlist) | .is_eem(eemlist) |
               .is_eemlist(blanklist) | .is_eem(blanklist)| is.data.frame(abs)|
               is.logical(process_file)| is.logical(replace_blank)|is.logical(raman)|
               is.logical(rayleigh)|is.logical(IFE)|is.logical(raman_norm)|
-              is.logical(dilute)|is.numeric(em_clip)|is.numeric(ex_clip)|
-              is.logical(doc_norm)|file.exists(prjpath))
+              is.logical(dilute)|is.numeric(em_clip)|is.numeric(ex_clip)|file.exists(prjpath))
 
   #make sure file directory is good
   if(file.exists(paste(prjpath,  "/5_Processed", sep=""))==F){
@@ -115,7 +114,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                        rayleigh_width = rayleigh_width, rayleigh_mask=rayleigh_mask,...)
   }
   if(length(empty_eems(X_mask, verbose=F)) >0){
-    stop("one or more of your EEMs has empty data after removing scattering, use 'empty_eems' function to find out which ones")
+    stop("one or more of your EEMs has empty data after removing scattering, try setting rayleigh_width to 'manual'")
   }
   #remove inner filtering effects
   X_ife <- X_mask
@@ -124,7 +123,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     X_ife <- eemR::eem_cut(X_mask, em=600:1000, ex=600:1000, exact=F)
     write.table(paste(Sys.time(), "- EEM's were clipped to just emission wavelengths under 600 nm", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
 
-    X_ife <- eemR::eem_inner_filter_effect(X_ife, absorbance=abs)
+    X_ife <- eem_inner_filter_effect(X_ife, absorbance=abs, verbose=F)
     write.table(paste(Sys.time(), "- EEM's were corrected for inner filter effects", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
     if(length(empty_eems(X_ife, verbose=F)) >0){
       stop("one or more of your EEMs has empty data after correcting for inner filter effects, use 'empty_eems' function to find out which ones")
@@ -179,38 +178,15 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
     stop("one or more of your EEMs has empty data after correcting for dilutions, use 'empty_eems' function to find out which ones")
   }
 
-  #normalize for DOC  ## currently doesn't do anything
-  X_DOC <- X_dil_cor
-  if(doc_norm == T){
-    #note eems with no DOC or value of 0
-    eem_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
-    eem_w_doc <- which(!(eem_names(X_DOC) %in% eem_rm))
-
-    #EEMs, will only correct those with DOC, only marks those corrected to keep track
-    X_DOC <- lapply(1:length(X_DOC), function(x){
-      if(x %in% eem_w_doc){
-        eem_name <- X_DOC[[x]]$sample
-        eem_index <- which(eem_name == meta$unique_ID)
-        X_DOC[[x]]$x <- X_DOC[[x]]$x / as.numeric(meta$DOC_mg_L[eem_index])
-        attr(X_DOC[[x]], "is_doc_normalized") <- TRUE
-      }
-      return(X_DOC[[x]])
-    })
-    class(X_DOC) <- "eemlist"
-    if(length(empty_eems(X_DOC, verbose=F)) >0){
-      stop("one or more of your EEMs has empty data after DOC normalization, use 'empty_eems' function to find out which ones")
-    }
-  }
-
-  #clip DOC normalized EEM's  #clips un-normalized eem
-  X_DOC_clip <- X_dil_cor
-  X_DOC_clip<- eem_cut2(X_DOC_clip, ex=ex_clip, em=em_clip, exact=F)
+  #clip EEM's  #clips un-normalized eem
+  X_clip <- X_dil_cor
+  X_clip<- eem_cut2(X_clip, ex=ex_clip, em=em_clip, exact=F)
   write.table(paste(Sys.time(), "- EEM's were clipped to Excitation:",ex_clip[1]," to ", ex_clip[2],
                     " nm and Emission:",em_clip[1]," to ", em_clip[2], " nm", sep=""), process_file_name, append=T, quote=F, row.names = F, col.names = F)
-  if(length(empty_eems(X_DOC_clip, verbose=F)) >0){
+  if(length(empty_eems(X_clip, verbose=F)) >0){
     stop("one or more of your EEMs has empty data after clipping, use 'empty_eems' function to find out which ones")
   }
- return(list(X_DOC_clip, Sabs_dil_cor))
+ return(list(X_clip, Sabs_dil_cor))
 }
 
 #' Modifying fluorescence data according to dilution.
@@ -260,7 +236,7 @@ eem_dilution <- function (data, dilution = 1)
 #' @param pathlength A numeric value indicating the pathlength (in cm) of the cuvette used for absorbance measurement. Default is 1 (1cm).
 #' @param verbose a logical, if TRUE will print out detailed information on filter effects, if false will only print those samples were dilution is reccomended
 #' @noRd
-eem_inner_filter_effect <- function (eem, absorbance, pathlength = 1, verbose=F)
+eem_inner_filter_effect <- function(eem, absorbance, pathlength = 1, verbose=F)
 {
   stopifnot(.is_eemlist(eem) | .is_eem(eem), is.data.frame(absorbance),
             is.numeric(pathlength))

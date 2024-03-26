@@ -31,7 +31,7 @@ load_eems <- function(prjpath){
     samp <- Sabs[,c]
     max <- max(samp)
     if(max > 0.3){
-      warning(paste("Sample",colnames(Sabs)[c], "has an aborbance of", round(max,3), "please dillute", sep=" "))
+      warning(paste("Sample",colnames(Sabs)[c], "has an maximum aborbance of", round(max,3), "consider dillution to maintain beer's law (max absorbance < 0.3)", sep=" "))
     }
   }
 

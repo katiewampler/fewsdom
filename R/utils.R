@@ -170,9 +170,11 @@ empty_eems <- function(eem, verbose=T){
       blank_check <- T
     }else{
       blank_check <- ifelse(nrow(eem$x) == 0 | ncol(eem$x) == 0, TRUE, FALSE)
+      cells <- dim(eem$x)[1]*dim(eem$x)[2]
+      na_check <- ifelse(sum(is.na(eem$x))==cells, TRUE, FALSE)
     }
 
-  if(blank_check == T){
+  if(blank_check == T | na_check==T){
     if(verbose==T){
       cat("Sample", eem$sample, "has no EEMs data \n")
     }
