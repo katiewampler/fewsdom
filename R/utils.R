@@ -1,6 +1,7 @@
 utils::globalVariables(c("%dopar%","i", ".",
                          "...","wavelength", "em", "z", "ex",
-                         "x","y", "data_identifier", "replicate_no"))
+                         "x","y", "data_identifier", "replicate_no", "meta","data_process",
+                         "meta_clean","raw_eem"))
 
 
 #' Create file structure

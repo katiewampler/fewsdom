@@ -33,9 +33,9 @@
 #' \dontrun{
 #' data_process <- eem_proccess(prjpath=prjpath, eemlist=X, blanklist=X_blk, abs=Sabs,
 #' process_file=process_file, meta=meta)
-#' }
+#'
 #' X_clean <- data_process[[1]]
-#' abs_clean <- data_process[[2]]
+#' abs_clean <- data_process[[2]]}
 
 eem_proccess <- function(prjpath, eemlist, blanklist, abs,
                          meta, process_file=T, replace_blank=F,

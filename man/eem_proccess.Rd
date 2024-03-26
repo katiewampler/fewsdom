@@ -79,7 +79,7 @@ dilution correction, removing inner filtering effects, raman normalization.
 \dontrun{
 data_process <- eem_proccess(prjpath=prjpath, eemlist=X, blanklist=X_blk, abs=Sabs,
 process_file=process_file, meta=meta)
-}
+
 X_clean <- data_process[[1]]
-abs_clean <- data_process[[2]]
+abs_clean <- data_process[[2]]}
 }
