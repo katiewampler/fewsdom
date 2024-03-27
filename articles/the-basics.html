@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">fewsdom</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.1.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,14 +122,14 @@ the original data.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"fewsdom_example_data"</span>, package <span class="op">=</span> <span class="st">"fewsdom"</span><span class="op">)</span> <span class="co">#locate example data</span></span>
 <span><span class="va">wd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu">str_split</span><span class="op">(</span><span class="va">data</span>, <span class="st">"fewsdom_example_data"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="co">#get location of package</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">wd</span>, <span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span> <span class="co">#create example folder (we'll delete at the end)</span></span>
-<span><span class="co">#unlink(paste(wd, "example", sep=""), recursive = T)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">wd</span>, <span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span>  <span class="co">#move example files over</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"example"</span><span class="op">)</span> <span class="co">#create example folder (we'll delete at the end)</span></span>
+<span><span class="co">#unlink("example", recursive = T)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span>  <span class="co">#move example files over</span></span></code></pre></div>
 <p>Check the example folder to ensure you’ve now got files in there, you
 should have 35 items. Lastly, we’ll save this new folder as our project
 path.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">prjpath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">wd</span>, <span class="st">"example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">prjpath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">"/example"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="step-3-run-the-function-to-process-the-data">Step 3: Run the function to process the data<a class="anchor" aria-label="anchor" href="#step-3-run-the-function-to-process-the-data"></a>
@@ -229,7 +229,7 @@ Lastly there’s a file named Figures, that contains the plots.</p>
 <span><span class="co">## [5] "MCSN0942211010937_1_5s.png" "MCSN0982211011046_1_5s.png"</span></span>
 <span><span class="co">## [7] "postTea221114_1_5s.png"     "preTea221114_1_5s.png"</span></span></code></pre>
 <div class="figure">
-<img src="../../../_temp/Library/fewsdom/example/5_Processed/Figures/EEM_summary_plot.png" alt="The summary plot  from the example" width="100%"><p class="caption">
+<img src="example/5_Processed/Figures/EEM_summary_plot.png" alt="The summary plot  from the example" width="100%"><p class="caption">
 The summary plot from the example
 </p>
 </div>
@@ -302,7 +302,7 @@ notice is that the spectral indices file now includes DOC normalized
 metrics for the samples with DOC data, it also contains absorbance data
 now. Lastly, we now have DOC normalized plots.</p>
 <div class="figure">
-<img src="../../../_temp/Library/fewsdom/example/5_Processed/Figures/EEM_summary_plot_DOC.png" alt="The summary plot  from the example" width="100%"><p class="caption">
+<img src="example/5_Processed/Figures/EEM_summary_plot_DOC.png" alt="The summary plot from the example" width="100%"><p class="caption">
 The summary plot from the example
 </p>
 </div>
