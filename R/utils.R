@@ -166,16 +166,14 @@ empty_eems <- function(eem, verbose=T){
     res <- unlist(res)
     return(res)
   }
+  #check if EEM has rows and columns and check's they're not all NA
+  blank_check <- F
+  if(is.null(dim(eem$x)) == T){blank_check <- T}
+  if(nrow(eem$x) == 0 | ncol(eem$x) == 0){blank_check <- T}
+  if(sum(is.na(eem$x))== (dim(eem$x)[1]*dim(eem$x)[2])){blank_check <- T}
 
-    if(is.null(dim(eem$x)) == T){
-      blank_check <- T
-    }else{
-      blank_check <- ifelse(nrow(eem$x) == 0 | ncol(eem$x) == 0, TRUE, FALSE)
-      cells <- dim(eem$x)[1]*dim(eem$x)[2]
-      na_check <- ifelse(sum(is.na(eem$x))==cells, TRUE, FALSE)
-    }
 
-  if(blank_check == T | na_check==T){
+  if(blank_check == T){
     if(verbose==T){
       cat("Sample", eem$sample, "has no EEMs data \n")
     }
