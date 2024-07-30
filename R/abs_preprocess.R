@@ -17,7 +17,7 @@
 #'   abs_preprocess(prjpath=prjpath, "mixed", meta)
 #' }
 
-abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
+abs_preprocess <- function(prjpath, runtype="mixed", meta){
   stopifnot(is.character(prjpath)|runtype %in% c("manual","sampleQ", "mixed")|
               file.exists(prjpath))
   abs_files <- list.files(paste(prjpath, "/1_Absorbance", sep="")) #get files to process
@@ -53,10 +53,7 @@ abs_preprocess <- function(prjpath, runtype="sampleQ", meta){
         df <- df[,c(1,10)]
       }
       if(nrow(df) > 250){
-        warning(paste("Your absorbance data",  x, "has too many rows, check if transmittence data got added. Data was clipped to the correct rows.", sep=" "))
-        df <- df[1:250,]
-        df$V10 <- as.numeric(df$V10)
-        df$V1 <- as.numeric(df$V1)
+        stop(paste("Your absorbance data",  x, "has too many rows, check if transmittence data got added.", sep=" "))
       }
       df <- subset(df, df$V1 <= 791) #it also doesn't end at the same spot, which throws an error if you have both manual and sample Q samples
 

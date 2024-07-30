@@ -222,7 +222,8 @@ clean_files <- function(prjpath, meta_file, meta_sheet="log", ...){
     Abs <- files[stringr::str_detect(files, "_Abs.dat")]
     blank <- files[stringr::str_detect(files, "_blank.dat")]
     EEM <- files[stringr::str_detect(files, ".dat")]
-    EEM <- EEM[!(EEM %in% c(Abs, blank))]
+    EEM <- EEM[!(EEM %in% c(Abs, blank))&
+                 !stringr::str_detect(EEM, "SEM|Waterfall|Abs |BEM|ABS")]
 
     if((length(Abs) > 0| length(blank) > 0| length(EEM) > 0)){
       file.copy(paste(prjpath, "/", Abs, sep=""), paste(prjpath, "/1_Absorbance/",sep=""))
