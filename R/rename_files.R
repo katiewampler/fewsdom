@@ -13,6 +13,16 @@
 files_rename <- function(meta, prjpath){
   stopifnot(is.data.frame(meta) | is.character(prjpath) |file.exists(prjpath))
 
+  #check for dates before sample names
+  file_correct <- list.files(prjpath)
+  file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
+  date_names <- length(stringr::str_split(file_correct, "-")[[1]]) > 6
+  if(date_names == T){
+    for(x in file_correct){
+      new_name <- stringr::str_split_i(x, "-", 7)
+      file.rename(from=paste(prjpath, x, sep="/"), to=paste(prjpath, new_name, sep="/"))
+    }}
+
   #determine which samples were run manually and which were run with the sample Q
   manual_rows <- which(meta$run_type == "manual" | meta$run_type == "Manual")
   sampleq_rows <- which(meta$run_type == "sampleQ" | meta$run_type == "sampleq")
