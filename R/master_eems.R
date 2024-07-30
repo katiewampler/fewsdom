@@ -70,7 +70,7 @@ run_eems <- function(prjpath, meta_name, get_doc=F, doc_file, doc_sheet,
 
   #Load Data in R
   cat("Loading data in R \n")
-  data<- load_eems(prjpath = prjpath)
+  data <- load_eems(prjpath = prjpath)
   X <- data[[1]]
   X_blk <- data[[2]]
   Sabs <- data[[3]]

@@ -23,6 +23,16 @@ files_rename <- function(meta, prjpath){
 
   #clean manual samples
   for(f in manual_rows){
+    #check for dates before sample names
+    file_correct <- list.files(prjpath)
+    file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
+    date_names <- length(stringr::str_split(file_correct, "-")[[1]]) > 6
+    if(date_names == T){
+      for(x in file_correct){
+        new_name <- stringr::str_split_i(x, "-", 7)
+        file.rename(from=paste(prjpath, x, sep="/"), to=paste(prjpath, new_name, sep="/"))
+      }}
+
     #write names of raw data
     raw_blank <- paste(meta$data_identifier[f], " (0", meta$replicate_no[f] ,") - Waterfall Plot Blank.dat", sep="")
     raw_eem <- paste(meta$data_identifier[f], " (0", meta$replicate_no[f] ,") - Waterfall Plot Sample.dat", sep="")
@@ -57,7 +67,14 @@ files_rename <- function(meta, prjpath){
   file_correct <- list.files(prjpath)
   file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
   correct <- grep('^B[2-9]S[1-9]', file_correct)
-  if(length(correct)> 0){
+  date_names <- length(stringr::str_split(file_correct, "-")[[1]]) > 6
+  if(date_names == T){
+    for(x in file_correct){
+      new_name <- stringr::str_split_i(x, "-", 7)
+      file.rename(from=paste(prjpath, x, sep="/"), to=paste(prjpath, new_name, sep="/"))
+    }
+  }
+   if(length(correct)> 0){
     correct_names <- stringr::str_sub(correct, start=3)
     correct_names <- paste("B1", correct_names, sep="")
     file.rename(from=paste(prjpath, correct, sep="/"), to=paste(prjpath, correct_names, sep="/"))
