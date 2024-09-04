@@ -4,7 +4,7 @@
 \alias{abs_preprocess}
 \title{Convert absorbance data from a .dat file to .csv file}
 \usage{
-abs_preprocess(prjpath, runtype = "sampleQ", meta)
+abs_preprocess(prjpath, runtype = "mixed", meta)
 }
 \arguments{
 \item{prjpath}{a string indicating the project file containing the absorbance data to process}

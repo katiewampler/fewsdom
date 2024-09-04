@@ -158,6 +158,7 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
   #account for dilutions
   X_dil_cor <- X_norm
   Sabs_dil_cor <- abs
+
   if(dilute == T){
     X_dil_cor <- lapply(1:length(X_dil_cor), function(x){
       attr(X_dil_cor[[x]], "is_dil_corrected") <- TRUE
@@ -173,14 +174,14 @@ eem_proccess <- function(prjpath, eemlist, blanklist, abs,
       dil_data <- meta %>% select(dilution) #invert to match function
       if(mean(unlist(dil_data), na.rm=T) < 1){dil_data <- 1 / dil_data
       warning("Inverted dilutions to be dilution factor")}
-
-      X_dil_cor <- X_dil_cor %>% staRdom::eem_dilution(dil_data)
+      X_dil_cor <- staRdom::eem_dilution(X_dil_cor, dil_data)
 
       #correct absorbance for dilution
       for(x in 1:nrow(meta)){
         dil_fact <- meta$dilution[x]
-        if(dil_fact < 1){dil_fact <- 1 / dil_fact }
-        Sabs_dil_cor[,meta$abs_col[x]] <- abs[,meta$abs_col[x]] * dil_fact}
+        if(dil_fact < 1){dil_fact <- 1 / dil_fact}
+        col_num <- grep(meta$data_identifier[x], colnames(Sabs_dil_cor))
+        Sabs_dil_cor[,col_num] <- abs[,col_num] * dil_fact}
     }
   }
   if(length(empty_eems(X_dil_cor, verbose=F)) >0){
