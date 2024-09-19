@@ -66,8 +66,12 @@ at ex= 370 nm. This is typically around 470 nm for natural materials however rec
 has shown that this can change considerably for pyrogenic organic matter (Egan et al. 2023).
 
 Humification Index (HIX): ex = 254 nm, em =\eqn{\sum}435:480 divided by em =\eqn{\sum}300:345.
-HIX proposed by Zsolnay (2002).
+HIX proposed by Zsolnay (1999).
 An indication of humic substances or extent of humification. Higher values indicate an higher degree of humification.
+
+Humification Index (HIX_ohno): ex = 254 nm, em =\eqn{\sum}435:480 divided by em =\eqn{\sum}435:480, \eqn{\sum}300:345.
+HIX proposed by Ohno (2002), both versions of HIX are used throughout the literature. Ohno is better when samples have
+higher absorbance because it accounts for inner filter effects better.
 
 Freshness Index (\eqn{\beta:\alpha}, fresh): ex = 310 nm, ratio of em = 380 nm to max in em = 420:435 nm.
 An indication of recently produced DOM, higher values indicate more recently produced DOM.
@@ -85,4 +89,8 @@ Coble, P. G., Lead, J., Baker, A., Reynolds, D. M., & Spencer, R. G. M. (Eds.). 
 Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing, B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved organic matter (DOM): Effects of biological and photolytic degradation. Limnology and Oceanography, 61(3), 1015–1032. https://doi.org/10.1002/lno.10270
 
 Egan, J. K., McKnight, D. M., Bowman, M. M., SanClements, M. D., Gallo, A. C., Hatten, J. A., & Matosziuk, L. M. (2023). Identifying photochemical alterations of dissolved pyrogenic organic matter using fluorescence spectroscopy. Aquatic Sciences, 85(2), 38. https://doi.org/10.1007/s00027-022-00919-7
+
+Zsolnay, A., E. Baigar, M. Jimenez, B. Steinweg, and F. Saccomandi. 1999. Differentiating with fluorescence spectroscopy the sources of dissolved organic matter in soils subjected to drying. Chemosphere 38: 45–50. doi:10.1016/S0045-6535(98)00166-0
+
+Ohno, T. 2002. Fluorescence inner-filtering correction for determining the humification index of dissolved organic matter. Environ Sci Technol 36: 742–746. doi:10.1021/es0155276
 }

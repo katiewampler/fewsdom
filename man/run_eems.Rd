@@ -18,6 +18,7 @@ run_eems(
   meta_sheet = "log",
   site_loc = c(1, 7),
   process_file = T,
+  replace_blank = NULL,
   ...
 )
 }
@@ -45,6 +46,8 @@ run_eems(
 \item{site_loc}{a vector indicating the start and end of the site name in the metadata data identifier}
 
 \item{process_file}{logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'}
+
+\item{replace_blank}{a character giving the data identifier of the sample that should be used for blank subtraction}
 
 \item{...}{additional arguments passed to the 'get_doc', 'clean_files', 'abs_preprocess', 'load_eems', 'eem_process', 'plot_eems', 'get_indices', 'save_eems' functions}
 }

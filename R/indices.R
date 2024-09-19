@@ -34,8 +34,6 @@ clean_transpose <- function(df){
 #'
 #' S275_295: Spectral slope between 275 to 295 nm.
 #'
-#' S290_350: Spectral slope between 290 to 350 nm.
-#'
 #' S350_400: Spectral slope between 350 to 400 nm.
 #'
 #' Spectral slopes are found with a nonlinear fit of an exponential function to
@@ -49,14 +47,13 @@ clean_transpose <- function(df){
 #' @param abs_data a dataframe containing the absorbance data, where each column is a sample
 #' @param waves optional, a vector of wavelengths in nm to extract from the absorbance data
 #' @param meta the metadata table for the sample run, should include DOC data in mg/L
-#' @param r_thresh the minimum \eqn{\text{R}^{2}} value for the spectral slopes for the slope to be included in the table
 #' @param keep_all a logical, TRUE will return all samples even those without DOC data, FALSE will only return samples with DOC data
+#' @param cuvle the length of the cuvette in cm
 #' @returns Returns a data frame of indices.
 #' @references Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing, B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved organic matter (DOM): Effects of biological and photolytic degradation. Limnology and Oceanography, 61(3), 1015–1032. https://doi.org/10.1002/lno.10270
 #' @export
 
-abs_parm <- function(abs_data, waves=NULL, meta,
-                     r_thresh=0.8, keep_all=F){
+abs_parm <- function(abs_data, waves=NULL, meta, keep_all=F, cuvle = 1){
   stopifnot(is.data.frame(c(abs_data, meta)) | is.numeric(r_thresh)|is.logical(keep_all))
 
   #interpolate data to find values that don't fall on the excitation wavelengths used
@@ -66,7 +63,7 @@ abs_parm <- function(abs_data, waves=NULL, meta,
 
   #build data table to put in data
   abs_out <- as.data.frame(matrix(nrow=(ncol(abs_data)-1), ncol=(15 + length(waves))))
-  colnam <- c("sample", paste("SUVA", c(254,280, 350, 370), sep=""), paste("SVA", c(412,440,480,510,532,555), sep=""), "S275_295", "S290_350","S350_400", "SR")
+  colnam <- c("sample", paste("SUVA", c(254,280, 350, 370), sep=""), paste("SVA", c(412,440,480,510,532,555), sep=""), "S275_295", "S350_400", "SR")
   if(length(waves) > 0){
     colnam <- c(colnam, paste("a", waves, sep=""))
   }
@@ -111,59 +108,19 @@ abs_parm <- function(abs_data, waves=NULL, meta,
     #abs_out$E4_E6[abs_out$a665 <= noise_val] <- NA
 
   #get ratios
-  S275_295 <- subset(data, data$wavelength >= 275 & data$wavelength <= 295)
-  .get_S275_295 <- function(abs_col, waves=S275_295$wavelength){
-    spec_data <- data.frame(waves = waves, abs=abs_col)
-    colnames(spec_data) <- c("waves", "abs_data")
-    spec_data$abs_data_m <- spec_data$abs_data * 100
-    spec_data$abs_data_ln <- log(spec_data$abs_data_m)
-    fit <-  lm(abs_data_m ~ waves, spec_data)
-    slope <- fit$coefficients[2] * -1
-    r2 <- summary(fit)$r.squared
-    output <- c(slope, r2)
-    output
-  }
+  S275_295 <- sapply(lapply(data[,-ncol(data)]*log(10)*100/cuvle, staRdom:::abs_fit_slope,
+                            wl=data$wavelength, lim=c(275, 295),
+                            l_ref=275), function(res) res$coefficients)
 
-  S290_350 <- subset(data, data$wavelength >= 290 & data$wavelength <= 350)
-  .get_S290_350 <- function(abs_col, waves=S290_350$wavelength){
-    spec_data <- data.frame(waves = waves, abs=abs_col)
-    colnames(spec_data) <- c("waves", "abs_data")
-    spec_data$abs_data_m <- spec_data$abs_data * 100
-    spec_data$abs_data_ln <- log(spec_data$abs_data_m)
-    fit <-  lm(abs_data_m ~ waves, spec_data)
-    slope <- fit$coefficients[2] * -1
-    r2 <- summary(fit)$r.squared
-    output <- c(slope, r2)
-    output
-  }
+  S350_400 <- sapply(lapply(data[,-ncol(data)]*log(10)*100/cuvle, staRdom:::abs_fit_slope,
+                            wl=data$wavelength, lim=c(350, 400),
+                            l_ref=350), function(res) res$coefficients)
 
-  S350_400 <- subset(data, data$wavelength >= 350 & data$wavelength <= 400)
-  .get_S350_400 <- function(abs_col, waves=S350_400$wavelength){
-    spec_data <- data.frame(waves = waves, abs=abs_col)
-    colnames(spec_data) <- c("waves", "abs_data")
-    spec_data$abs_data_m <- spec_data$abs_data * 100
-    spec_data$abs_data_ln <- log(spec_data$abs_data_m)
-    fit <-  lm(abs_data_m ~ waves, spec_data)
-    slope <- fit$coefficients[2] * -1
-    r2 <- summary(fit)$r.squared
-    output <- c(slope, r2)
-    output
-  }
 
-  S275_295_r <- suppressWarnings(apply(S275_295[,1:(ncol(data)-1)], 2, .get_S275_295))
-  S290_350_r <- suppressWarnings(apply(S290_350[,1:(ncol(data)-1)], 2, .get_S290_350))
-  S350_400_r <- suppressWarnings(apply(S350_400[,1:(ncol(data)-1)], 2, .get_S350_400))
-
-  abs_out$S275_295 <- S275_295_r[1,]
-  abs_out$S275_295[S275_295_r[2,] <= r_thresh] <- NA #remove if R2 is poor
-  abs_out$S290_350 <- S290_350_r[1,]
-  abs_out$S290_350[S290_350_r[2,] <= r_thresh] <- NA #remove if R2 is poor
-  abs_out$S350_400 <- S350_400_r[1,]
-  abs_out$S350_400[S350_400_r[2,] <= r_thresh] <- NA #remove if R2 is poor
-
+  abs_out$S275_295 <- as.numeric(S275_295)
+  abs_out$S350_400 <- as.numeric(S350_400)
 
   abs_out$SR <- abs_out$S275_295 / abs_out$S350_400
-  abs_out$SR[abs_out$S275_295 <= 0.005] <- NA
 
   #remove samples missing DOC
   if(keep_all == F){
@@ -221,8 +178,12 @@ abs_parm <- function(abs_data, waves=NULL, meta,
 #' has shown that this can change considerably for pyrogenic organic matter (Egan et al. 2023).
 #'
 #' Humification Index (HIX): ex = 254 nm, em =\eqn{\sum}435:480 divided by em =\eqn{\sum}300:345.
-#' HIX proposed by Zsolnay (2002).
+#' HIX proposed by Zsolnay (1999).
 #' An indication of humic substances or extent of humification. Higher values indicate an higher degree of humification.
+#'
+#' Humification Index (HIX_ohno): ex = 254 nm, em =\eqn{\sum}435:480 divided by em =\eqn{\sum}435:480, \eqn{\sum}300:345.
+#' HIX proposed by Ohno (2002), both versions of HIX are used throughout the literature. Ohno is better when samples have
+#' higher absorbance because it accounts for inner filter effects better.
 #'
 #' Freshness Index (\eqn{\beta:\alpha}, fresh): ex = 310 nm, ratio of em = 380 nm to max in em = 420:435 nm.
 #' An indication of recently produced DOM, higher values indicate more recently produced DOM.
@@ -243,6 +204,8 @@ abs_parm <- function(abs_data, waves=NULL, meta,
 #' @references Coble, P. G., Lead, J., Baker, A., Reynolds, D. M., & Spencer, R. G. M. (Eds.). (2014). Aquatic Organic Matter Fluorescence. Cambridge: Cambridge University Press. https://doi.org/10.1017/CBO9781139045452
 #' @references Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing, B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved organic matter (DOM): Effects of biological and photolytic degradation. Limnology and Oceanography, 61(3), 1015–1032. https://doi.org/10.1002/lno.10270
 #' @references Egan, J. K., McKnight, D. M., Bowman, M. M., SanClements, M. D., Gallo, A. C., Hatten, J. A., & Matosziuk, L. M. (2023). Identifying photochemical alterations of dissolved pyrogenic organic matter using fluorescence spectroscopy. Aquatic Sciences, 85(2), 38. https://doi.org/10.1007/s00027-022-00919-7
+#' @references Zsolnay, A., E. Baigar, M. Jimenez, B. Steinweg, and F. Saccomandi. 1999. Differentiating with fluorescence spectroscopy the sources of dissolved organic matter in soils subjected to drying. Chemosphere 38: 45–50. doi:10.1016/S0045-6535(98)00166-0
+#' @references Ohno, T. 2002. Fluorescence inner-filtering correction for determining the humification index of dissolved organic matter. Environ Sci Technol 36: 742–746. doi:10.1021/es0155276
 #' @export
 #'
 eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
@@ -289,12 +252,12 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   #list peaks
   coble_em_peak <- list(pB=300:320, pT=320:350, pA=380:480, pM=380:420,
                         pC=420:480, pD=509, pE=521, pN=370, FI=c(470,520),
-                        HIX=c(300:345), fresh=c(380, 420:435),
+                        HIX=c(300:345), HIX_o=c(435:480,300:345),fresh=c(380, 420:435),
                         RFE=460, BIX=c(380, 430))
 
   coble_ex_peak <- list(pB=270:280, pT=270:280, pA=250:260, pM=310:320,
                         pC=330:350, pD=390, pE=455, pN=280, FI=370,
-                        HIX=254, fresh=310, RFE=370, BIX=310)
+                        HIX=254, HIX_o=254, fresh=310, RFE=370, BIX=310)
 
   #checks if all the required peaks are in the eem dataset
   if (!all(coble_ex_peak %in% eem$ex) & verbose) {
@@ -358,6 +321,19 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
      HIX <- sum_em_435_480/(sum_em_300_345)
   } else{HIX <- NA}
 
+  #humification index (ohno)
+  em_435_480 <- seq(from = 435, to = 480, by = 1)
+  em_300_345 <- seq(from = 300, to = 345, by = 1)
+  ex_254 <- rep(254, length(em_300_345))
+  sum_em_435_480 <- sum(pracma::interp2(eem$ex, eem$em, eem$x,
+                                        ex_254, em_435_480))
+  sum_em_300_345 <- sum(pracma::interp2(eem$ex, eem$em, eem$x,
+                                        ex_254, em_300_345))
+
+  if(sum_em_435_480 >= noise_val & sum_em_300_345 >= noise_val){
+    HIX_o <- sum_em_435_480/(sum_em_300_345 + sum_em_435_480)
+  } else{HIX_o <- NA}
+
   #fresh
   fluo_380 <- pracma::interp2(eem$ex, eem$em, eem$x, 310, 380)
   fluo_420_435 <- max_peak_val(310, 420:435, eem)
@@ -379,7 +355,7 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
 
   output <- data.frame(sample = eem$sample, pB=pB, pT=pT, pA=pA, pM=pM,
                        pC=pC, pD=pD, pE=pE, pN=pN, rAT=rAT, rCA=rCA,
-                       rCM=rCM, rCT=rCT, FI=FI, FI_max = FI_max, HIX=HIX, fresh=fresh,
+                       rCM=rCM, rCT=rCT, FI=FI, FI_max = FI_max, HIX=HIX, HIX_ohno=HIX_o, fresh=fresh,
                        RFE=RFE, BIX=BIX, stringsAsFactors = FALSE)
 
   #clean a little
@@ -410,10 +386,12 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
 #' @param prjpath location to save the exported absorbance and fluorescence metrics
 #' @param doc_norm either TRUE, FALSE or "both" indicating if peaks should be normalized by DOC concentrations
 #' @param sampsascol a logical indicating how results should be oriented, TRUE puts samples as columns, FALSE puts samples as rows
+#' @param cuvle the length of the cuvette in cm
 #' @param waves optional, a vector of wavelengths in nm to extract from the absorbance data
 #' @export
 
-get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", sampsascol=F, waves=NULL){
+get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both",
+                        sampsascol=F, waves=NULL, cuvle=1){
 
   stopifnot(.is_eem(eem_list) | .is_eemlist(eem_list) | is.data.frame(c(abs_data, meta))|
               is.character(prjpath) | is.logical(sampsascol) | file.exists(prjpath))
@@ -458,8 +436,7 @@ get_indices <- function(eem_list, abs_data, meta, prjpath,doc_norm="both", samps
   }
 
   #get absorbance data
-    abs_df <- abs_parm(abs_data, meta=meta,
-                       r_thresh=0.8, keep_all=F, waves=c(254, waves))
+    abs_df <- abs_parm(abs_data, meta=meta, cuvle = cuvle, keep_all=F, waves=c(254, waves))
 
     if(sampsascol == T){abs_df <- clean_transpose(abs_df)}
     if(nrow(abs_df) > 0){

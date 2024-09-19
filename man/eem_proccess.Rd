@@ -11,7 +11,7 @@ eem_proccess(
   abs,
   meta,
   process_file = T,
-  replace_blank = F,
+  replace_blank = NULL,
   raman = T,
   rayleigh = T,
   IFE = T,
@@ -39,7 +39,7 @@ eem_proccess(
 
 \item{process_file}{logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'}
 
-\item{replace_blank}{logical, if TRUE it will find the first sample labeled "blank" or "blk" and use that for blank subtraction, use when instrument blank has errors}
+\item{replace_blank}{a character giving the data identifier of the sample that should be used for blank subtraction}
 
 \item{raman}{logical, if TRUE will use 'raman' function to remove raman scattering}
 

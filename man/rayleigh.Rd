@@ -10,6 +10,7 @@ rayleigh(
   rayleigh_width = "auto",
   rayleigh_interp = c(F, F),
   process_file = NULL,
+  process_file_name = process_file_name,
   verbose = F,
   ...
 )

@@ -15,6 +15,7 @@
 #' @param meta_sheet a string of the metadata sheet name, only required if the metadata file is an .xlsx file
 #' @param site_loc a vector indicating the start and end of the site name in the metadata data identifier
 #' @param process_file logical, if TRUE it will put a text file in the processed data folder named 'processing_tracking'
+#' @param replace_blank a character giving the data identifier of the sample that should be used for blank subtraction
 #' @param ... additional arguments passed to the 'get_doc', 'clean_files', 'abs_preprocess', 'load_eems', 'eem_process', 'plot_eems', 'get_indices', 'save_eems' functions
 #'
 #' @return saves processed EEMs as .csv and .rds files, absorbance as .csv and .rds, and metadata as .csv
@@ -48,7 +49,7 @@
 run_eems <- function(prjpath, meta_name, get_doc=F, doc_file, doc_sheet,
                          doc_column=7, name_column=4, nskip=3,
                          doc_delim="-", meta_sheet="log", site_loc=c(1,7),
-                          process_file=T, ...){
+                          process_file=T, replace_blank=NULL, ...){
   meta_file <- paste(prjpath,"/", meta_name, sep="")
 
   if(get_doc == T){
@@ -85,7 +86,7 @@ run_eems <- function(prjpath, meta_name, get_doc=F, doc_file, doc_sheet,
   ## Process the EEM's
   cat("Processing EEMs and absorbance data \n")
   data_process <- eem_proccess(prjpath=prjpath, eemlist=X, blanklist=X_blk, abs=Sabs,
-                               process_file=process_file, meta=meta,...)
+                               process_file=process_file, meta=meta, replace_blank=replace_blank, ...)
   X_clean <- data_process[[1]]  #returns non doc normalized data
   abs_clean <- data_process[[2]]
 

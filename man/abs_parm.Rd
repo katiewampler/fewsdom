@@ -4,7 +4,7 @@
 \alias{abs_parm}
 \title{Get absorbance peaks and indices}
 \usage{
-abs_parm(abs_data, waves = NULL, meta, r_thresh = 0.8, keep_all = F)
+abs_parm(abs_data, waves = NULL, meta, keep_all = F, cuvle = 1)
 }
 \arguments{
 \item{abs_data}{a dataframe containing the absorbance data, where each column is a sample}
@@ -13,9 +13,9 @@ abs_parm(abs_data, waves = NULL, meta, r_thresh = 0.8, keep_all = F)
 
 \item{meta}{the metadata table for the sample run, should include DOC data in mg/L}
 
-\item{r_thresh}{the minimum \eqn{\text{R}^{2}} value for the spectral slopes for the slope to be included in the table}
-
 \item{keep_all}{a logical, TRUE will return all samples even those without DOC data, FALSE will only return samples with DOC data}
+
+\item{cuvle}{the length of the cuvette in cm}
 }
 \value{
 Returns a data frame of indices.
@@ -38,8 +38,6 @@ Units of \eqn{\text{L mgC}^{-1} \text{m}^{-1}}.
 Typically higher values are associated with greater aromatic content.
 
 S275_295: Spectral slope between 275 to 295 nm.
-
-S290_350: Spectral slope between 290 to 350 nm.
 
 S350_400: Spectral slope between 350 to 400 nm.
 

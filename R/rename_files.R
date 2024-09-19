@@ -16,12 +16,12 @@ files_rename <- function(meta, prjpath){
   #check for dates before sample names
   file_correct <- list.files(prjpath)
   file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
-  date_names <- length(stringr::str_split(file_correct, "-")[[1]]) > 6
-  if(date_names == T){
-    for(x in file_correct){
-      new_name <- stringr::str_split_i(x, "-", 7)
-      file.rename(from=paste(prjpath, x, sep="/"), to=paste(prjpath, new_name, sep="/"))
-    }}
+  date_names <- grep("^\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-.*$",file_correct)
+  if(length(date_names) > 0){
+      new_names <- gsub("^\\d{4}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-\\d{2}-",
+                       "", file_correct)
+      file.rename(from=paste(prjpath, file_correct, sep="/"), to=paste(prjpath, new_name, sep="/"))
+    }
 
   #determine which samples were run manually and which were run with the sample Q
   manual_rows <- which(meta$run_type == "manual" | meta$run_type == "Manual")
@@ -33,16 +33,6 @@ files_rename <- function(meta, prjpath){
 
   #clean manual samples
   for(f in manual_rows){
-    #check for dates before sample names
-    file_correct <- list.files(prjpath)
-    file_correct <- file_correct[reader::get.ext(file_correct)=="dat"]
-    date_names <- length(stringr::str_split(file_correct, "-")[[1]]) > 6
-    if(date_names == T){
-      for(x in file_correct){
-        new_name <- stringr::str_split_i(x, "-", 7)
-        file.rename(from=paste(prjpath, x, sep="/"), to=paste(prjpath, new_name, sep="/"))
-      }}
-
     #write names of raw data
     raw_blank <- paste(meta$data_identifier[f], " (0", meta$replicate_no[f] ,") - Waterfall Plot Blank.dat", sep="")
     raw_eem <- paste(meta$data_identifier[f], " (0", meta$replicate_no[f] ,") - Waterfall Plot Sample.dat", sep="")
@@ -53,7 +43,7 @@ files_rename <- function(meta, prjpath){
     clean_eem <- paste(meta$unique_ID[f], ".dat", sep="")
     clean_abs <- paste(meta$unique_ID[f], "_Abs.dat", sep="")
 
-    #double check if raw data exsits
+    #double check if raw data exists
     blank_check <- file.exists(paste(prjpath, raw_blank, sep="/"))
     eem_check <- file.exists(paste(prjpath, raw_eem, sep="/"))
     abs_check <- file.exists(paste(prjpath, raw_abs, sep="/"))
