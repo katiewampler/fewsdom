@@ -27,6 +27,8 @@ raman(
 \item{process_file}{a file path to a .txt file, used to track processing changes to EEMs}
 
 \item{verbose}{a logical, if TRUE will print out widths used to mask via the auto width method}
+
+\item{...}{additional arguments passed to the 'eem_interp' function}
 }
 \description{
 Will remove both first and second order raman scattering with the option to interpolate

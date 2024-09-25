@@ -54,7 +54,7 @@ clean_transpose <- function(df){
 #' @export
 
 abs_parm <- function(abs_data, waves=NULL, meta, keep_all=F, cuvle = 1){
-  stopifnot(is.data.frame(c(abs_data, meta)) | is.numeric(r_thresh)|is.logical(keep_all))
+  stopifnot(is.data.frame(c(abs_data, meta)) |is.logical(keep_all))
 
   #interpolate data to find values that don't fall on the excitation wavelengths used
   data <- lapply(abs_data[,-1], function(x) approx(abs_data$wavelength, x, xout=c(249:791))[[2]])
