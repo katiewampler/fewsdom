@@ -24,7 +24,9 @@ raman(
 
 \item{raman_interp}{a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second}
 
-\item{process_file}{a file path to a .txt file, used to track processing changes to EEMs}
+\item{process_file}{logical, should a process file be generated?}
+
+\item{process_file_name}{a file path to a .txt file, used to track processing changes to EEMs}
 
 \item{verbose}{a logical, if TRUE will print out widths used to mask via the auto width method}
 

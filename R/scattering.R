@@ -222,13 +222,15 @@ find_cut_width <- function(eem, type="rayleigh", order=1){
 #' @param rayleigh_mask optional if auto width method is used, a vector of length 4 specifying the width of the rayleigh line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line
 #' @param rayleigh_width either "auto" or "manual", if auto is chosen cutting widths will be found using the 'find_cut_width' function
 #' @param rayleigh_interp a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second
-#' @param process_file a file path to a .txt file, used to track processing changes to EEMs
+#' @param process_file logical, should a process file be generated?
+#' @param process_file_name a file path to a .txt file, used to track processing changes to EEMs
 #' @param verbose a logical, if TRUE will print out widths used to mask via the auto width method
 #' @param ... additional arguments passed to the 'eem_interp' function
 #' @export
 
 rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), rayleigh_width="auto",
-                     rayleigh_interp=c(F,F), process_file=NULL, process_file_name = process_file_name,
+                     rayleigh_interp=c(F,F), process_file=NULL,
+                     process_file_name = process_file_name,
                      verbose=F, ...){
   #function checks
   stopifnot(.is_eemlist(eem) | is.numeric(rayleigh_mask)|length(rayleigh_mask)==4|
@@ -280,7 +282,8 @@ rayleigh <- function(eem, rayleigh_mask=c(20,10,10,10), rayleigh_width="auto",
 #' @param raman_mask a vector of length 4 specifying the width of the raman line to cut, numbers 1:2 are width above and below first order line, numbers 3:4 are width above and below second order line, since you cannot use the auto method for second order raman this must be specified
 #' @param raman_width either "auto" or "manual". If auto is chosen cutting widths will be found using the 'find_cut_width' function
 #' @param raman_interp a vector of length two, either T or F, specifying whether the first and second order lines should be interpolated, the first position refers to the first order line, the way the code is written you cannot interpolate the first order line and not the second
-#' @param process_file a file path to a .txt file, used to track processing changes to EEMs
+#' @param process_file logical, should a process file be generated?
+#' @param process_file_name a file path to a .txt file, used to track processing changes to EEMs
 #' @param verbose a logical, if TRUE will print out widths used to mask via the auto width method
 #' @param ... additional arguments passed to the 'eem_interp' function
 #' @export
