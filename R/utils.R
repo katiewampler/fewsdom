@@ -49,7 +49,7 @@ create_files <- function(prjpath){
 .eem_doc_norm <- function(eem, meta){
   #remove EEMs with no DOC data (or value of 0)
   EEM_rm <- meta$unique_ID[meta$DOC_mg_L == 0 | is.na(meta$DOC_mg_L) == T]
-  eem <- eem_exclude(eem,
+  eem <- staRdom::eem_exclude(eem,
                    exclude=list("ex"=c(), "em"=c(),"sample"= EEM_rm ))
 
   #check if they've been normalized
