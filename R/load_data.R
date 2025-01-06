@@ -24,7 +24,7 @@ load_eems <- function(prjpath){
   X_blk <- eemR::eem_read(paste(prjpath, "/2_Blanks/",sep=""), recursive = F, import_function = "aqualog")
 
   #load in absorbance data
-  Sabs <- absorbance_read(paste(prjpath, "/4_Clean_Absorbance", sep=""))
+  Sabs <- staRdom::absorbance_read(paste(prjpath, "/4_Clean_Absorbance", sep=""))
 
   #check absorbance (if over 0.3) will return warning for samples above, else will just run in background
   for(c in 2:ncol(Sabs)){
