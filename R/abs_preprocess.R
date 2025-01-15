@@ -52,7 +52,7 @@ abs_preprocess <- function(prjpath, runtype="mixed", meta){
       if(samp_runtype %in% c("manual", "Manual")){
         df <- df[,c(1,10)]
       }
-      if(nrow(df) > 350){
+      if("Wavelength" %in% df[,1]){
         stop(paste("Your absorbance data",  x, "has too many rows, check if transmittence data got added.", sep=" "))
       }
       df <- subset(df, df$V1 <= 791) #it also doesn't end at the same spot, which throws an error if you have both manual and sample Q samples
