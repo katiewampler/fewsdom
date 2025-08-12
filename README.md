@@ -1,26 +1,290 @@
 
-# fewsdom
+# Introduction
 
-<!-- badges: start -->
-<!-- badges: end -->
+This a guide to walk through how to analyze EEM’s and aborbance data
+collected via a Horiba Aqualog using the ‘fewsdom’ package in R. While
+it was designed to minimize the lines of visible code needed to process
+samples by creating a single function (process_eems) to run all the
+processing steps, this comes at the cost of making it a little harder to
+customize the processing steps.
 
-The goal of fewsdom is to ...
+This guide will walk through the steps to process raw EEM’s using the
+main summary function. To have a look at the underlying functions see
+the fewsdom: underlying functions R markdown.
 
-## Installation
+# Processing Samples the Default Way
 
-You can install the development version of fewsdom from [GitHub](https://github.com/) with:
+## Step 1: Install the fewsdom package
+
+The ‘fewsdom’ package is currently only available on github, there is a
+hope to tidy further and submit to CRAN at some point. Thus to install
+the package, run the following lines of code.
 
 ``` r
-# install.packages("pak")
-pak::pak("katiewampler/fewsdom")
+library(devtools)
+install_github("katiewampler/fewsdom")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
+You will also want to install Rtools
+(<https://cran.r-project.org/bin/windows/Rtools/>) if you have not
+already. If you have already done both of these things before, then
+you’ll just need to load the library.
 
 ``` r
 library(fewsdom)
-## basic example code
 ```
 
+## Step 2: Specify where the data to analyze is
+
+The ‘fewsdom’ package is designed so you direct it at a folder with raw
+data and it will organize the data, process it, and report it all in
+that folder so you have your finished results contained in that folder.
+Thus the most important part of running data is to tell it where your
+data folder is.
+
+In our lab, we have a new date folder for each sample run, separated by
+project, so we specify the date the data was run, the project, and this
+creates a variable ‘prjpath’ which is where all your data is.
+
+``` r
+run_date <- "2022_11_14" 
+project <- "2_PNNL_DOM/" 
+prjpath <- paste("T:/Research/Aqualog_Data/", project, run_date, sep="")
+```
+
+For the purposes of this example, we’ll use the example data within the
+package. We’ll also copy this data to a new folder so we preserve the
+original data.
+
+``` r
+data <- system.file("fewsdom_example_data", package = "fewsdom") #locate example data
+wd <- unlist(str_split(data, "fewsdom_example_data"))[1] #get location of package
+dir.create("example") #create example folder (we'll delete at the end)
+#unlink("example", recursive = T)
+file.copy(file.path(data, list.files(data)), paste("example", sep=""))  #move example files over
+```
+
+Check the example folder to ensure you’ve now got files in there, you
+should have 35 items. Lastly, we’ll save this new folder as our project
+path.
+
+``` r
+prjpath <- paste(getwd(),"/example", sep="")
+```
+
+## Step 3: Run the function to process the data
+
+I created a single function to do everything for a few reasons, first I
+wanted it to be easy for everyone to use, even those with minimal coding
+experience. I also wanted to ensure the processing steps were
+standardized so all the data is analyzed the same way for comparability.
+Lastly, I was concerned that having a long processing script with
+multiple users would lead to accidental code changes causing the script
+to break. Thus while this package has many more functions that can be
+used to write your own custom processing script, the main function is
+‘run_eems’.
+
+Ideally the EEM’s samples should be run concurrently with measurements
+of dissolved organic carbon (DOC) so the samples can be normalized to
+this value. It’s also required to calculate some common metrics like
+SUVA 254. That being said, sometimes we run test samples, where DOC
+isn’t required. The main function (run_eems) is built to handle both
+cases, but I’ve laid out sample functions for each. We’ll run without
+DOC data first.
+
+### Metadata
+
+Before we get into the function let’s load the metadata first so you can
+see what it should look like. There is a template in the package named
+“metadata_example, let’s load it and have a look at the formatting. You
+cannot run samples unless you have correctly formatted metadata. If
+you’re getting error messages, make sure your metadata looks correct.
+
+``` r
+metadata <- read_xlsx(file.path(prjpath, "metadata_example.xlsx"))  #load example data
+metadata 
+```
+
+    ## # A tibble: 7 × 11
+    ##   index analysis_date       description    data_identifier   replicate_no
+    ##   <dbl> <dttm>              <chr>          <chr>                    <dbl>
+    ## 1     1 2022-11-14 00:00:00 Sample Blank 1 BLK2211141                   1
+    ## 2     2 2022-11-14 00:00:00 PreTea 1% SRM  preTea221114                 1
+    ## 3     3 2022-11-14 00:00:00 MCSN092        MCSN0922211011340            1
+    ## 4     4 2022-11-14 00:00:00 MCSN094        MCSN0942211010937            1
+    ## 5     5 2022-11-14 00:00:00 MCSN098        MCSN0982211011046            1
+    ## 6     6 2022-11-14 00:00:00 PostTea 1% SRM postTea221114                1
+    ## 7     7 2022-11-14 00:00:00 Sample Blank 2 BLK2211142                   1
+    ## # ℹ 6 more variables: integration_time_s <dbl>, dilution <dbl>,
+    ## #   RSU_area_1s <dbl>, run_type <chr>, DOC_mg_L <lgl>, Notes <lgl>
+
+For more explanation of what goes into each column pull up a help file
+describing each column.
+
+``` r
+help(meta) 
+```
+
+### Process without DOC data
+
+In this function the only things that need to be specified are the
+location of the data (prjpath) which we’ve already set, the metadata
+name (meta_name) which will be used to find the metadata in the folder,
+and if we should look for DOC data (get_doc) in this example this should
+be false.
+
+``` r
+run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx")
+```
+
+    ## Renaming files and putting in files 
+    ## Loading data in R
+
+    ## Registered S3 method overwritten by 'GGally':
+    ##   method from   
+    ##   +.gg   ggplot2
+
+    ## Processing EEMs and absorbance data 
+    ## Reporting EEMs and absorbance data
+
+    ## Warning in plot_eems(prjpath = prjpath, meta = meta, eem = X_clean, doc_norm =
+    ## F): Metadata didn't contain any DOC data, unable to create DOC normalized
+    ## plots.
+
+    ## Warning in get_indices(X_clean, abs_clean, meta, prjpath = prjpath, doc_norm =
+    ## "both", : No DOC data was provided, DOC normalized fluorescence metrics were
+    ## not calculated
+
+    ## Warning in get_indices(X_clean, abs_clean, meta, prjpath = prjpath, doc_norm =
+    ## "both", : No DOC data was provided, absorbance metrics were not calculated
+
+    ##  
+    ##  EEM's have been successfully processed. Look in the 5_Processed folder for plots and indices
+
+Here we see that we get a warning that because we don’t have DOC
+normalized data, we can’t get those plots, this is because the code
+tries to provide both.
+
+All the code outputs will be located in the folder named ‘5_Processed’.
+We can look at what’s in the processed folder now.
+
+``` r
+list.files(file.path(prjpath, "5_Processed")) 
+```
+
+    ##  [1] "BLK2211141_1_5s.csv"          "BLK2211142_1_5s.csv"         
+    ##  [3] "Figures"                      "MCSN0922211011340_1_5s.csv"  
+    ##  [5] "MCSN0942211010937_1_5s.csv"   "MCSN0982211011046_1_5s.csv"  
+    ##  [7] "metadata.rds"                 "postTea221114_1_5s.csv"      
+    ##  [9] "preTea221114_1_5s.csv"        "processed_absdata.rds"       
+    ## [11] "Processed_Absorbance.csv"     "processed_eemlist.rds"       
+    ## [13] "processing_tracking.txt"      "SpectralIndices_example.xlsx"
+
+It will save each processed EEM’s as a .csv file, it will also save the
+processed EEMs, absorbance data, and metadata as R data files (.rds). It
+calculates and reports some standard spectral indices and provides a
+text file showing the processing steps performed on the data. Lastly
+there’s a file named Figures, that contains the plots.
+
+``` r
+list.files(file.path(prjpath, "5_Processed/Figures")) 
+```
+
+    ## [1] "BLK2211141_1_5s.png"        "BLK2211142_1_5s.png"       
+    ## [3] "EEM_summary_plot.png"       "MCSN0922211011340_1_5s.png"
+    ## [5] "MCSN0942211010937_1_5s.png" "MCSN0982211011046_1_5s.png"
+    ## [7] "postTea221114_1_5s.png"     "preTea221114_1_5s.png"
+
+![](example/5_Processed/Figures/EEM_summary_plot.png)
+
+Later we’ll have a look at the what’s going on in the script, but for
+now, lets move on and analyze the samples with DOC this time.
+
+### Process with DOC data
+
+The main difference between running the ‘run_eems’ function with and
+without DOC data is that if you set ‘get_doc’ to TRUE you need to
+provide a spreadsheet with those DOC values and sites, and the code will
+match the samples in your metadata to those sites and add the
+concentrations to you metadata. Because of this there’s a few more
+things that need to be specified in the function.
+
+First we need to specify the doc file (doc_file). This can be either an
+excel file or csv file. If it’s a excel file though, the sheet name must
+be specified (doc_sheet). Additionally you must tell the code which
+column has the DOC data (doc_column) and the site name (name_column). If
+there’s lines that need be skipped at the beginning that can be done
+with ‘nskip’.
+
+Lastly there are two arguments that help the code match up the sites
+between the DOC data and the metadata. Sample names are often given as a
+site name followed by the date and time of collection, the ‘doc_delin’
+argument allows you to set the symbol that’s separating the site name
+and the other sampling information in the DOC data. Lastly, you must do
+the same for the sample names in the metadata. However, due to the
+software, the sample names cannot contain underscores thus we must
+specify the start and end of the sample names. This is used to extract
+just the site name without any date or time identifiers so you can more
+easily merge data and compare. The values you specify are used in a
+str_sub function similar to this:
+
+``` r
+site_loc <- c(1,7)
+site <- "MCSN012202301011214" #site name (MCSN012) with the date and time it was collected
+(site_clean <- str_sub(site, site_loc[1], site_loc[2]))
+```
+
+    ## [1] "MCSN012"
+
+So the first number here is the location in the string where your site
+name starts, the second number is where the site name ends. If we look
+at the metadata, we can see we should be using c(1,7)
+
+``` r
+str_sub(meta$data_identifier, site_loc[1], site_loc[2])
+```
+
+    ## [1] "BLK2211" "preTea2" "MCSN092" "MCSN094" "MCSN098" "postTea" "BLK2211"
+    ## [8] "preTea2"
+
+You can see that the blanks and tea standards get a little cut off,
+that’s okay as these samples don’t have DOC data to match to anyways.
+
+Now that we understand the extra parameters a little better, let’s
+analyze our EEM’s with the DOC data. The code is built to overwrite
+previous processing, so we don’t need a fresh example folder, it will
+just recognize that the files have already been organized and load them
+in to process.
+
+``` r
+#analyze EEM's data
+run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx",get_doc=T,
+             doc_file = file.path(prjpath, "example_DOC_data.xlsx"),
+             doc_sheet="MCKI Data", doc_column=7, name_column = 4,
+             nskip=1, doc_delim="-", site_loc=c(1,7))
+```
+
+    ## Linked 3/7 samples with DOC data
+    ## Renaming files and putting in files 
+    ## Loading data in R 
+    ## Processing EEMs and absorbance data 
+    ## Reporting EEMs and absorbance data
+
+    ##  
+    ##  EEM's have been successfully processed. Look in the 5_Processed folder for plots and indices
+
+Notice this time it says that it was able to link 3 out of the 7 samples
+with DOC data and did not give any errors about plotting DOC. Have a
+look at the processed folder now. The main differences you should notice
+is that the spectral indices file now includes DOC normalized metrics
+for the samples with DOC data, it also contains absorbance data now.
+Lastly, we now have DOC normalized plots.
+
+![](example/5_Processed/Figures/EEM_summary_plot_DOC.png)
+
+Notice that there’s only 3, because we only have three sample with DOC
+data.
+
+And that’s it, you now know the basics to take raw EEM’s data and
+process it! If you want to know more about the functions within the
+run_eems function, have a look at the ‘under-the-hood’ vingette.

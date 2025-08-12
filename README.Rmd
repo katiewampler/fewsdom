@@ -83,7 +83,7 @@ metadata
 
 For more explanation of what goes into each column pull up a help file describing each column.
 
-```{r eval=FALSE}
+```{r, eval=FALSE}
 help(meta) 
 ```
 
