@@ -108,11 +108,11 @@ abs_parm <- function(abs_data, waves=NULL, meta, keep_all=F, cuvle = 1){
     #abs_out$E4_E6[abs_out$a665 <= noise_val] <- NA
 
   #get ratios
-  S275_295 <- sapply(lapply(data[,-ncol(data)]*log(10)*100/cuvle, staRdom:::abs_fit_slope,
+  S275_295 <- sapply(lapply(data[,-ncol(data)]*log(10)*100/cuvle, staRdom::abs_fit_slope,
                             wl=data$wavelength, lim=c(275, 295),
                             l_ref=275), function(res) res$coefficients)
 
-  S350_400 <- sapply(lapply(data[,-ncol(data)]*log(10)*100/cuvle, staRdom:::abs_fit_slope,
+  S350_400 <- sapply(lapply(data[,-ncol(data)]*log(10)*100/cuvle, staRdom::abs_fit_slope,
                             wl=data$wavelength, lim=c(350, 400),
                             l_ref=350), function(res) res$coefficients)
 
