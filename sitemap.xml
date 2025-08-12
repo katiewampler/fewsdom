@@ -1,96 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/404.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/articles/the-basics.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/index.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/abs_parm.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/abs_preprocess.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/check_samps.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/clean_files.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/create_files.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/data_process.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/eem_coble_peaks2.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/eem_cut2.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/eem_proccess.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/eem_remove_scattering2.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/empty_eems.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/files_rename.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/find_cut_width.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/get_doc.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/get_indices.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/ggeem2.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/load_eems.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/meta.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/meta_clean.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/plot_eems.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/raman.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/raw_eem.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/rayleigh.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/run_eems.html</loc>
-  </url>
-  <url>
-    <loc>https://katiewampler.github.io/fewsdom/reference/save_eems.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://katiewampler.github.io/fewsdom/404.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/authors.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/index.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/abs_parm.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/abs_preprocess.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/check_samps.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/clean_files.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/create_files.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/data_process.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/eem_coble_peaks2.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/eem_cut2.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/eem_proccess.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/eem_remove_scattering2.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/empty_eems.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/files_rename.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/find_cut_width.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/get_doc.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/get_indices.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/ggeem2.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/index.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/load_eems.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/meta.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/meta_clean.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/plot_eems.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/raman.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/raw_eem.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/rayleigh.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/run_eems.html</loc></url>
+<url><loc>https://katiewampler.github.io/fewsdom/reference/save_eems.html</loc></url>
 </urlset>
+
