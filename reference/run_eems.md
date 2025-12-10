@@ -1,0 +1,129 @@
+# Takes raw EEMs and absorbance data from Aqualog, returns cleaned, processed data Combines all the 'fewsdom' functions to make one function to process samples.
+
+Takes raw EEMs and absorbance data from Aqualog, returns cleaned,
+processed data Combines all the 'fewsdom' functions to make one function
+to process samples.
+
+## Usage
+
+``` r
+run_eems(
+  prjpath,
+  meta_name,
+  get_doc = F,
+  doc_file,
+  doc_sheet,
+  doc_column = 7,
+  name_column = 4,
+  nskip = 3,
+  doc_delim = "-",
+  meta_sheet = "log",
+  site_loc = c(1, 7),
+  process_file = T,
+  replace_blank = NULL,
+  ...
+)
+```
+
+## Arguments
+
+- prjpath:
+
+  path to folder with raw samples
+
+- meta_name:
+
+  the file name of the metadata with the extension
+
+- get_doc:
+
+  logical, if TRUE will use 'get_doc' function to match DOC data to
+  metadata samples, only required if get_doc is TRUE
+
+- doc_file:
+
+  a string of the file path of the DOC file, can be .xlsx or .csv, only
+  required if get_doc is TRUE
+
+- doc_sheet:
+
+  a string of the sheet name of the DOC results, only required if the
+  DOC file is an .xlsx file, only required if get_doc is TRUE
+
+- doc_column:
+
+  a numeric indicating which column the DOC results are stored in in the
+  DOC file, only required if get_doc is TRUE
+
+- name_column:
+
+  a numeric indicating which column the sample/site names are stored in
+  the DOC file, only required if get_doc is TRUE
+
+- nskip:
+
+  a numeric indicating a number of lines to skip when reading in the DOC
+  file, optional, only required if get_doc is TRUE
+
+- doc_delim:
+
+  a string indicating the separation between site name and other
+  identifiers in the DOC data, it will only keep the first piece, only
+  required if get_doc is TRUE
+
+- meta_sheet:
+
+  a string of the metadata sheet name, only required if the metadata
+  file is an .xlsx file
+
+- site_loc:
+
+  a vector indicating the start and end of the site name in the metadata
+  data identifier
+
+- process_file:
+
+  logical, if TRUE it will put a text file in the processed data folder
+  named 'processing_tracking'
+
+- replace_blank:
+
+  a character giving the data identifier of the sample that should be
+  used for blank subtraction
+
+- ...:
+
+  additional arguments passed to the 'get_doc', 'clean_files',
+  'abs_preprocess', 'load_eems', 'eem_process', 'plot_eems',
+  'get_indices', 'save_eems' functions
+
+## Value
+
+saves processed EEMs as .csv and .rds files, absorbance as .csv and
+.rds, and metadata as .csv creates plots for each sample and calculates
+indices.
+
+## Details
+
+The following steps are chosen by default: -DOC is added to the metadata
+and the file is overwritten
+
+-The file directory is created, raw files are zipped
+
+-A process file is created, The instrument blank is subtracted from the
+samples, raman scattering is removed and interpolated, rayleigh
+scattering is removed but not interpolated, widths are determined
+automatically, samples are corrected for inner filter effects, raman
+normalized, and normalized for DOC, excitation is clipped from 247 to
+450 nm, emission is clipped from 247 to 550 nm
+
+-Sample are plotted individually and a summary plot using the parula
+color palette with descriptions for the plot titles, the peaks are not
+annotated on the plot. Plots are created for DOC normalized data
+(\_DOC), and for non normalized data.
+
+-Fluorescence indices are reported for data that has and hasn't been DOC
+normalized, sample are reported in rows.
+
+If you want to change these defaults add the appropriate arguments into
+the function to change the defaults for the other functions.

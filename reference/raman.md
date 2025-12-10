@@ -1,0 +1,62 @@
+# Removes raman scattering with optional interpolation
+
+Will remove both first and second order raman scattering with the option
+to interpolate the removed area. Also makes note that the correct was
+made.
+
+## Usage
+
+``` r
+raman(
+  eem,
+  raman_mask = c(8, 8, 1.5, 1.5),
+  raman_width = "auto",
+  raman_interp = c(T, T),
+  process_file = NULL,
+  process_file_name = process_file_name,
+  verbose = F,
+  ...
+)
+```
+
+## Arguments
+
+- eem:
+
+  an object of class eemlist
+
+- raman_mask:
+
+  a vector of length 4 specifying the width of the raman line to cut,
+  numbers 1:2 are width above and below first order line, numbers 3:4
+  are width above and below second order line, since you cannot use the
+  auto method for second order raman this must be specified
+
+- raman_width:
+
+  either "auto" or "manual". If auto is chosen cutting widths will be
+  found using the 'find_cut_width' function
+
+- raman_interp:
+
+  a vector of length two, either T or F, specifying whether the first
+  and second order lines should be interpolated, the first position
+  refers to the first order line, the way the code is written you cannot
+  interpolate the first order line and not the second
+
+- process_file:
+
+  logical, should a process file be generated?
+
+- process_file_name:
+
+  a file path to a .txt file, used to track processing changes to EEMs
+
+- verbose:
+
+  a logical, if TRUE will print out widths used to mask via the auto
+  width method
+
+- ...:
+
+  additional arguments passed to the 'eem_interp' function

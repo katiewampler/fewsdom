@@ -1,0 +1,136 @@
+# Get Coble Peaks and other fluorescence indicies
+
+Modified from 'eem_coble_peaks' from eemR package to include some
+additional indices and modified definitions of Coble peaks. For indices
+that are ratios, the values in the ratio must be 5 times (or specifed
+amount) greater than the area below the 1:1 line (considered noise). If
+the desired wavelength is not explicitly measured the EEM will be
+interpolated using the interp2 function from the pracma library.
+
+## Usage
+
+``` r
+eem_coble_peaks2(eem, abs_data, noise_ratio = 5, verbose = FALSE)
+```
+
+## Arguments
+
+- eem:
+
+  an object of class eem or eemlist
+
+- abs_data:
+
+  dataframe of absorbance data matching the samples, used to calculate
+  relative fluorescence efficiency
+
+- noise_ratio:
+
+  numeric indicating the noise threshold for ratio calculations
+
+- verbose:
+
+  logical determining if additional messages should be printed
+
+## Value
+
+Returns a data frame containing fluorescence peaks and indices for each
+sample
+
+## Details
+
+Coble peaks are based on Coble et al. 2014 and are defined as follows:
+
+Peak B (pB): ex = 270:280 nm, em = 300:320 nm, Tyrosine-like
+
+Peak T (pT): ex = 270:280 nm, em = 320:350 nm, Tryptophan-like
+
+Peak A (pA): ex = 250:260 nm, em = 380:480 nm, Humic-like.
+
+Peak M (pM): ex = 310:320 nm, em = 380:420 nm, Marine humic-like
+
+Peak C (pC): ex = 330:350 nm, em = 420:480 nm, Humic-like
+
+Peak D (pD): ex = 390 nm, em = 509 nm, Soil fulvic acid
+
+Peak E (pE): ex = 455 nm, em = 521 nm, Soil fulvic acid
+
+Peak N (pN): ex = 280 nm, em = 370 nm, Plankton derived
+
+Given that peaks A, B, C, M, and T are not defined at fixed excitation
+and emission wavelength, the maximum fluorescence value in the region is
+extracted.
+
+Additional fluorescence indices are based on Hansen et al. 2016.
+Measurements are defined as follows:
+
+rAT: The ratio of peak A to peak T, indication of the amount of humic
+like (recalcitrant) to fresh (liable) DOM.
+
+rCA: The ratio of peak C to peak A, indication of the amount of humic
+like to fumic like DOM.
+
+rCM: The ratio of peak C to peak M, indication of the amount of
+diagenetically altered (blueshifted) DOM.
+
+rCT: The ratio of peak C to peak T, indication of the amount of humic
+like (recalcitrant) to fresh (liable) DOM.
+
+Fluorescence Index (FI): Ratio of fluorescence at ex = 370 nm, em = 470
+nm to em = 520 nm. Identifies the relative contributions of terrestrial
+to microbial DOM sources.
+
+Max Wavelength of FI (FI_max): The location (wavelength) of the maxiumum
+emission peak at ex= 370 nm. This is typically around 470 nm for natural
+materials however recent work has shown that this can change
+considerably for pyrogenic organic matter (Egan et al. 2023).
+
+Humification Index (HIX): ex = 254 nm, em =\\\sum\\435:480 divided by em
+=\\\sum\\300:345. HIX proposed by Zsolnay (1999). An indication of humic
+substances or extent of humification. Higher values indicate an higher
+degree of humification.
+
+Humification Index (HIX_ohno): ex = 254 nm, em =\\\sum\\435:480 divided
+by em =\\\sum\\435:480, \\\sum\\300:345. HIX proposed by Ohno (2002),
+both versions of HIX are used throughout the literature. Ohno is better
+when samples have higher absorbance because it accounts for inner filter
+effects better.
+
+Freshness Index (\\\beta:\alpha\\, fresh): ex = 310 nm, ratio of em =
+380 nm to max in em = 420:435 nm. An indication of recently produced
+DOM, higher values indicate more recently produced DOM.
+
+Relative Fluorescence Efficiency (RFE): Ratio of fluorescence at ex =
+370 nm, em = 460 nm to absorbance at 370 nm. An indicator of the
+relative amount of algal to non-algal DOM.
+
+Biological Index (BIX): ex = 310 nm, ratio of em = 380 nm to em = 430
+nm. An indicator of autotrophic productivity, values above 1 indicate
+recently produced autochthonous DOM.
+
+## References
+
+Coble, P. G., Lead, J., Baker, A., Reynolds, D. M., & Spencer, R. G. M.
+(Eds.). (2014). Aquatic Organic Matter Fluorescence. Cambridge:
+Cambridge University Press. https://doi.org/10.1017/CBO9781139045452
+
+Hansen, A. M., Kraus, T. E. C., Pellerin, B. A., Fleck, J. A., Downing,
+B. D., & Bergamaschi, B. A. (2016). Optical properties of dissolved
+organic matter (DOM): Effects of biological and photolytic degradation.
+Limnology and Oceanography, 61(3), 1015–1032.
+https://doi.org/10.1002/lno.10270
+
+Egan, J. K., McKnight, D. M., Bowman, M. M., SanClements, M. D., Gallo,
+A. C., Hatten, J. A., & Matosziuk, L. M. (2023). Identifying
+photochemical alterations of dissolved pyrogenic organic matter using
+fluorescence spectroscopy. Aquatic Sciences, 85(2), 38.
+https://doi.org/10.1007/s00027-022-00919-7
+
+Zsolnay, A., E. Baigar, M. Jimenez, B. Steinweg, and F. Saccomandi.
+1999. Differentiating with fluorescence spectroscopy the sources of
+dissolved organic matter in soils subjected to drying. Chemosphere 38:
+45–50. doi:10.1016/S0045-6535(98)00166-0
+
+Ohno, T. 2002. Fluorescence inner-filtering correction for determining
+the humification index of dissolved organic matter. Environ Sci Technol
+36: 742–746. doi:10.1021/es0155276

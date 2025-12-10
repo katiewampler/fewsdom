@@ -1,0 +1,62 @@
+# Removes rayleigh scattering with optional interpolation
+
+Will remove both first and second order rayleigh scattering with the
+option to interpolate the removed area. Also makes note that the
+correction was made in an optional text file.
+
+## Usage
+
+``` r
+rayleigh(
+  eem,
+  rayleigh_mask = c(20, 10, 10, 10),
+  rayleigh_width = "auto",
+  rayleigh_interp = c(F, F),
+  process_file = NULL,
+  process_file_name = process_file_name,
+  verbose = F,
+  ...
+)
+```
+
+## Arguments
+
+- eem:
+
+  an object of class eemlist
+
+- rayleigh_mask:
+
+  optional if auto width method is used, a vector of length 4 specifying
+  the width of the rayleigh line to cut, numbers 1:2 are width above and
+  below first order line, numbers 3:4 are width above and below second
+  order line
+
+- rayleigh_width:
+
+  either "auto" or "manual", if auto is chosen cutting widths will be
+  found using the 'find_cut_width' function
+
+- rayleigh_interp:
+
+  a vector of length two, either T or F, specifying whether the first
+  and second order lines should be interpolated, the first position
+  refers to the first order line, the way the code is written you cannot
+  interpolate the first order line and not the second
+
+- process_file:
+
+  logical, should a process file be generated?
+
+- process_file_name:
+
+  a file path to a .txt file, used to track processing changes to EEMs
+
+- verbose:
+
+  a logical, if TRUE will print out widths used to mask via the auto
+  width method
+
+- ...:
+
+  additional arguments passed to the 'eem_interp' function
