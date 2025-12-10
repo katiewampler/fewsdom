@@ -233,7 +233,7 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   #gets ratio after checking for noise thresholds
   ratio_val <-function(x, y, noise){
     if(is.na(x) == F & is.na(y) == F){
-      if(x >= noise & y >= noise){ratio <- x/y}else{ratio <- NA}
+      if(all(!is.na(c(x, y))) && x >= noise & y >= noise){ratio <- x/y}else{ratio <- NA}
     }else{ratio <- NA}
     ratio
   }
@@ -297,7 +297,7 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   #fluorescence index
   fluo_470 <- pracma::interp2(eem$ex, eem$em, eem$x, 370, 470)
   fluo_520 <- pracma::interp2(eem$ex, eem$em, eem$x, 370, 520)
-  if(fluo_470 >= noise_val & fluo_520 >= noise_val){
+  if(all(!is.na(c(fluo_470, fluo_520))) && fluo_470 >= noise_val & fluo_520 >= noise_val){
     FI <- fluo_470/fluo_520
     #get peak FI
     fluo_370 <- pracma::interp2(eem$ex, eem$em, eem$x, rep(370, 351), 248:598)
@@ -317,7 +317,7 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   sum_em_300_345 <- sum(pracma::interp2(eem$ex, eem$em, eem$x,
                                             ex_254, em_300_345))
 
-  if(sum_em_435_480 >= noise_val & sum_em_300_345 >= noise_val){
+  if(all(!is.na(c(sum_em_435_480, sum_em_300_345))) && sum_em_435_480 >= noise_val & sum_em_300_345 >= noise_val){
      HIX <- sum_em_435_480/(sum_em_300_345)
   } else{HIX <- NA}
 
@@ -330,21 +330,21 @@ eem_coble_peaks2 <- function (eem, abs_data, noise_ratio = 5, verbose = FALSE){
   sum_em_300_345 <- sum(pracma::interp2(eem$ex, eem$em, eem$x,
                                         ex_254, em_300_345))
 
-  if(sum_em_435_480 >= noise_val & sum_em_300_345 >= noise_val){
+  if(all(!is.na(c(sum_em_435_480, sum_em_300_345))) && sum_em_435_480 >= noise_val & sum_em_300_345 >= noise_val){
     HIX_o <- sum_em_435_480/(sum_em_300_345 + sum_em_435_480)
   } else{HIX_o <- NA}
 
   #fresh
   fluo_380 <- pracma::interp2(eem$ex, eem$em, eem$x, 310, 380)
   fluo_420_435 <- max_peak_val(310, 420:435, eem)
-  if(fluo_380 >= noise_val & fluo_420_435 >= noise_val){
+  if(all(!is.na(c(fluo_380, fluo_420_435))) && fluo_380 >= noise_val & fluo_420_435 >= noise_val){
     fresh <- fluo_380/fluo_420_435
   } else{fresh <- NA}
 
   #bix
   fluo_380 <- pracma::interp2(eem$ex, eem$em, eem$x, 310, 380)
   fluo_430 <- pracma::interp2(eem$ex, eem$em, eem$x, 310, 430)
-  if(fluo_380 >= noise_val & fluo_430 >= noise_val){
+  if(all(!is.na(c(fluo_380, fluo_430))) && fluo_380 >= noise_val & fluo_430 >= noise_val){
     BIX <- fluo_380/fluo_430
   } else{BIX <- NA}
 

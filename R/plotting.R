@@ -150,7 +150,7 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
   #create plot
   plot <- ggplot2::ggplot(df, aes(x,y, z=z)) +
     ggplot2::geom_contour_filled(aes(z = z), breaks=breaks)+
-    ggplot2::coord_cartesian(expand = FALSE) + geom_contour(breaks=breaks, color=colors[1], size=0.1) +
+    ggplot2::coord_cartesian(expand = FALSE) + geom_contour(breaks=breaks, color=colors[1], linewidth=0.1) +
     ggplot2::labs(x="Excitation (nm)", y="Emission (nm)")+
     ggplot2::theme_bw() +
     ggplot2::theme(axis.text = element_text(colour = 1, size = 10),
@@ -162,7 +162,7 @@ ggeem2 <- function(eem, manualscale=F, manualmax=1.5, manualmin=0,
     ggplot2::guides(fill = guide_legend(title.position = "right",direction = "vertical",
                                title.theme = element_text(angle = 90, size = 12, colour = "black"),
                                barheight = .5, barwidth = .95,
-                               title.hjust = 0.5, raster = FALSE,
+                               title.hjust = 0.5,
                                title = plot_z, reverse=TRUE)) +
     ggplot2::scale_x_continuous(breaks = round(seq(x_min, x_max, by = x_range),1)) +
     ggplot2::scale_y_continuous(breaks = round(seq(y_min, y_max, by = y_range),1))
