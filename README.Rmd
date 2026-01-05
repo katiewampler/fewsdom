@@ -14,6 +14,10 @@ library(stringr)
 library(readxl)
 ```
 
+# Update January 2026 
+
+The `fewsdom` package has been deprecated by the `eemanalyzeR` package <https://github.com/katiewampler/eemanalyzeR> and will no longer be updated.
+
 # Introduction
 
 This a guide to walk through how to analyze EEM's and aborbance data collected via a Horiba Aqualog using the 'fewsdom' package in R. While it was designed to minimize the lines of visible code needed to process samples by creating a single function (process_eems) to run all the processing steps, this comes at the cost of making it a little harder to customize the processing steps.
