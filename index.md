@@ -1,3 +1,9 @@
+# Update January 2026
+
+The `fewsdom` package has been deprecated by the `eemanalyzeR` package
+<https://github.com/katiewampler/eemanalyzeR> and will no longer be
+updated.
+
 # Introduction
 
 This a guide to walk through how to analyze EEM’s and aborbance data
@@ -140,12 +146,7 @@ run_eems(prjpath = prjpath, meta_name = "metadata_example.xlsx")
 
 ``` R
 ## Renaming files and putting in files 
-## Loading data in R
-
-## Registered S3 method overwritten by 'GGally':
-##   method from   
-##   +.gg   ggplot2
-
+## Loading data in R 
 ## Processing EEMs and absorbance data 
 ## Reporting EEMs and absorbance data
 
